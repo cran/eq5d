@@ -12,7 +12,7 @@
 
 <meta name="author" content="Fraser Morton and Jagtar Singh Nijjar" />
 
-<meta name="date" content="2019-05-20" />
+<meta name="date" content="2019-06-27" />
 
 <title>Calculating EQ-5D indices with eq5d</title>
 
@@ -95,7 +95,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Calculating EQ-5D indices with eq5d</h1>
 <h4 class="author">Fraser Morton and Jagtar Singh Nijjar</h4>
-<h4 class="date">20 May 2019</h4>
+<h4 class="date">27 June 2019</h4>
 
 
 
@@ -110,6 +110,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>For EQ-5D-5L, a standardised valuation study protocol (EQ-VT) was developed by the EuroQol group based on the composite time trade-off (cTTO) valuation technique supplemented by a discrete choice experiment (DCE). The EuroQol group recommends users to use a standard value set where available.</p>
 <p>The EQ-5D-5L “crosswalk” value sets published by <a href="https://www.ncbi.nlm.nih.gov/pubmed/22867780">van Hout <em>et al</em></a> are also included. The crosswalk value sets enable index values to be calculated for EQ-5D-5L data where no value set is available by mapping between the EQ-5D-5L and EQ-5D-3L descriptive systems.</p>
 <p>Additional information on EQ-5D can be found on the <a href="https://www.euroqol.org">EuroQol</a> website as well as in <a href="https://www.doi.org/10.1007/1-4020-5511-0">Szende <em>et al</em> (2007)</a> and <a href="https://www.doi.org/10.1007/978-94-007-7596-1">Szende <em>et al</em> (2014)</a>. Advice on <a href="https://euroqol.org/eq-5d-instruments/eq-5d-3l-about/valuation/choosing-a-value-set/">choosing a value set</a> can also be found on the EuroQol website.</p>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>You can install the released version of eq5d from <a href="https://CRAN.R-project.org">CRAN</a> with:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;eq5d&quot;</span>)</code></pre></div>
+<p>And the development version from <a href="https://github.com/">GitHub</a> with:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># install.packages(&quot;devtools&quot;)</span>
+devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;fragla/eq5d&quot;</span>)</code></pre></div>
+</div>
 <div id="quick-start" class="section level2">
 <h2>Quick Start</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(eq5d)
@@ -138,12 +146,12 @@ scores.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Return all value sets (top 6 returned for brevity).</span>
 <span class="kw">head</span>(<span class="kw">valuesets</span>())
 <span class="co">#&gt;    Version Type Country</span>
-<span class="co">#&gt; 1 EQ-5D-3L  TTO Denmark</span>
-<span class="co">#&gt; 2 EQ-5D-3L  TTO  France</span>
-<span class="co">#&gt; 3 EQ-5D-3L  TTO Germany</span>
-<span class="co">#&gt; 4 EQ-5D-3L  TTO   Italy</span>
-<span class="co">#&gt; 5 EQ-5D-3L  TTO   Japan</span>
-<span class="co">#&gt; 6 EQ-5D-3L  TTO   Korea</span>
+<span class="co">#&gt; 1 EQ-5D-3L  TTO  Brazil</span>
+<span class="co">#&gt; 2 EQ-5D-3L  TTO  Canada</span>
+<span class="co">#&gt; 3 EQ-5D-3L  TTO   Chile</span>
+<span class="co">#&gt; 4 EQ-5D-3L  TTO Denmark</span>
+<span class="co">#&gt; 5 EQ-5D-3L  TTO  France</span>
+<span class="co">#&gt; 6 EQ-5D-3L  TTO Germany</span>
 
 <span class="co"># Return VAS based value sets (top 6 returned for brevity).</span>
 <span class="kw">head</span>(<span class="kw">valuesets</span>(<span class="dt">type=</span><span class="st">&quot;VAS&quot;</span>))
@@ -174,8 +182,9 @@ scores.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
 </div>
 <div id="shiny-web-interface" class="section level2">
 <h2>Shiny web interface</h2>
-<p>The calulation of multiple EQ-5D indices can also be performed by upload of a CSV or Excel file using the packaged <a href="https://shiny.rstudio.com">Shiny</a> app. This requires the <a href="https://cran.r-project.org/package=shiny">shiny</a>, <a href="https://cran.r-project.org/package=DT">DT</a>, <a href="https://cran.r-project.org/package=mime">mime</a> and <a href="https://cran.r-project.org/package=readxl">readxl</a> packages. The CSV/Excel headers should be the same as the names of the vector passed to the <strong><em>eq5d</em></strong> function i.e. MO, SC, UA, PD and AD. The app is launched using the <strong><em>shiny_eq5d</em></strong> function.</p>
+<p>The calculation (and visualisation) of multiple EQ-5D indices can also be performed by upload of a CSV or Excel file using the packaged <a href="https://shiny.rstudio.com">Shiny</a> app. This requires the <a href="https://cran.r-project.org/package=shiny">shiny</a>, <a href="https://cran.r-project.org/package=DT">DT</a>, <a href="https://cran.r-project.org/package=ggplot2">ggplot2</a>, <a href="https://cran.r-project.org/package=mime">mime</a> and <a href="https://cran.r-project.org/package=readxl">readxl</a> packages. The CSV/Excel headers should be the same as the names of the vector passed to the <strong><em>eq5d</em></strong> function i.e. MO, SC, UA, PD and AD. The app is launched using the <strong><em>shiny_eq5d</em></strong> function.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">shiny_eq5d</span>()</code></pre></div>
+<p>Alternatively, it can be accessed without installing R/Shiny/eq5d by visiting <a href="https://fragla.shinyapps.io/shiny-eq5d">shinyapps.io</a>.</p>
 </div>
 </div>
 
