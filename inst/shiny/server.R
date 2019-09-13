@@ -3,6 +3,9 @@ library(DT)
 library(mime)
 library(readxl)
 library(ggplot2)
+library(ggiraph)
+library(ggiraphExtra)
+library(shinyWidgets)
 
 options(shiny.sanitize.errors = FALSE)
 
@@ -114,6 +117,7 @@ shinyServer(function(input, output) {
     if(is.null(input$data) || is.null(input$version) || is.null(input$type) || is.null(input$country))
       return()
     
+    print(paste(input$version, type=input$type, country=input$country))
     vs <- valuesets(version=input$version, type=input$type, country=input$country)
     
     if(nrow(vs) != 1)
@@ -148,13 +152,13 @@ shinyServer(function(input, output) {
     paste0("The index for EQ-5D-", input$version, " ", input$country, " ", input$type, " value set is: ", score)
   })
   
-  output$export<- renderUI({
+  output$export_table <- renderUI({
     if(!is.null(input$data)) {
-      downloadButton("download", 'Download Output File')
+      downloadButton("download_table", 'Download Output File')
     }
   })
   
-  output$download <- downloadHandler(
+  output$download_table <- downloadHandler(
     filename = function() {
       paste(input$version, "_", input$country, "_", input$type, "_", format(Sys.time(), "%Y%m%d%H%M%S"), ".csv", sep = "")
     },
@@ -163,13 +167,28 @@ shinyServer(function(input, output) {
     }
   )
   
+  output$export_plot <- renderUI({
+    if(!is.null(input$data)) {
+      downloadButton("download_plot", 'Download plot')
+    }
+  })
+  
+  output$download_plot <- downloadHandler(
+    filename = function() {
+      paste(input$version, "_", input$country, "_", input$type, "_", input$plot_type, "_", format(Sys.time(), "%Y%m%d%H%M%S"), ".pdf", sep = "")
+    },
+    content = function(file) {
+      ggsave(file, getPlot(),"pdf")
+    }
+  )
+  
   rawdata <- reactive({
     if(input$data$type %in% c(mimemap["xls"], mimemap["xlsx"])) {
-      dat <- read_excel(input$data$datapath)
+      dat <- read_excel(input$data$datapath, na=c("NA",""))
       dat <- as.data.frame(dat)
     }
     else {
-      dat <- read.csv(file=input$data$datapath, header=TRUE)
+      dat <- read.csv(file=input$data$datapath, header=TRUE, stringsAsFactors=FALSE, na.strings=c("NA",""))
     }   
   })
   
@@ -180,7 +199,13 @@ shinyServer(function(input, output) {
     if(is.null(idx)) {
       stop("Unable to identify EQ-5D dimensions in the file header.")
     }
-    return(dat[,idx])
+    
+    dat <- dat[,idx]
+    if(!all(sapply(dat, function(x) is.numeric(x)))) {
+      stop("Non-numeric values found in uploaded EQ-5D dimensions.")
+    }
+    
+    return(dat)
   })
   
   getColumnIndex <- function(dat) {
@@ -200,7 +225,7 @@ shinyServer(function(input, output) {
     }
   }
   
-  getTableData <- function() {
+  getTableData <- reactive({
     eq5d <- eq5d(dataset(), version=input$version, type=input$type, country=input$country)
     if(input$raw) {
       res <- cbind(rawdata(), eq5d)
@@ -209,64 +234,95 @@ shinyServer(function(input, output) {
     }
     colnames(res)[ncol(res)] <- "Index"
     return(res)
-  }
+  })
+  
+  getTableDataByGroup <- reactive({
+    data <- getTableData()
+    
+    if(input$group != "None") {
+      data <- data[which(data[,input$group] %in% input$group_member),]
+    }
+    
+    return(data)
+  })
 
-  output$plot <- renderPlot({
+  output$plot <- renderggiraph({
     if(is.null(input$data) || is.null(input$plot_type) || is.null(input$group))
       return()
+    
+    if(input$group!="None" && is.null(input$group_member))
+      return()
+
+    code <- getPlot()
+
+    output <- ggiraph(code = print(code), selection_type = "single")
+
+    return(output)
+  })
+  
+  getPlot <- reactive({
+    if(is.null(input$group)) {
+      return()
+    }
 
     if(input$plot_type=="density") {
-      return(density_plot())
+      print("Density")
+      code <- density_plot()
     } else if(input$plot_type=="ecdf") {
-      return(ecdf_plot())
-    } else {
+      print("ECDF")
+      code <- ecdf_plot()
+    } else if(input$plot_type=="radar") {
+      print("Radar")
+      code <- radar_plot()
+    }  else {
       stop("Unable to identify plot type")
     }
+    return(code)
   })
 
   density_plot <- reactive({
     if(is.null(input$data) || is.null(input$plot_type) || is.null(input$group))
       return()
 
-    data <- getTableData()
-
-    ave.meth <- get_average_method()
+    data <- getTableDataByGroup()
     
-    if(input$group=="None" || !input$raw) {
-      p <- ggplot(data, aes_string(x=input$plot_data)) + 
-           geom_density(color="darkblue", fill="lightblue", alpha=0.4)
-
-      if(input$average) {
-        p <- p + geom_vline(aes_string(xintercept=ave.meth(data[[input$plot_data]])),
-            color="darkblue", linetype="dashed")
+    if(nrow(data) > 0) {
+      ave.meth <- get_average_method()
+      
+      if(input$group=="None" || !input$raw) {
+        p <- ggplot(data, aes_string(x=input$plot_data)) + 
+             geom_density(color="darkblue", fill="lightblue", alpha=0.4)
+  
+        if(input$average) {
+          p <- p + geom_vline_interactive(aes_string(xintercept=ave.meth(data[[input$plot_data]])),
+              color="darkblue", linetype="dashed", tooltip = paste0(input$average_method, ": ", get_average_value()), data_id = "density_mean")
+        }
+             
+      } else {
+        colours <- getGroupColours()
+        mu <- get_average_value()
+        p <- ggplot(data, aes_string(x=input$plot_data, fill=input$group)) + 
+             geom_density(alpha=0.4) + scale_fill_manual(values=colours) + scale_color_manual(values=colours)  
+  
+        if(input$average) {
+          p <- p + geom_vline_interactive(data=mu, aes_string(xintercept="x", color="group"),
+               linetype="dashed", show.legend=FALSE, tooltip = paste0(input$average_method, ": ", mu$x), data_id = paste0("density_", input$average_method, "_", mu$group))
+        }   
       }
-           
-    } else {
-
-      mu <- aggregate(data[[input$plot_data]], list(group=data[[input$group]]), ave.meth)
-
-      p <- ggplot(data, aes_string(x=input$plot_data, fill=input$group)) + 
-           geom_density(alpha=0.4)         
-
-      if(input$average) {
-        p <- p + geom_vline(data=mu, aes_string(xintercept="x", color="group"),
-             linetype="dashed", show.legend=FALSE)
-      }   
+  
+      if(input$plot_data != "Index") {
+        p <- p + scale_x_continuous(breaks= 1:sub("L", "", input$version), labels = 1:sub("L", "", input$version))
+      }
+  
+      return(p)
     }
-
-    if(input$plot_data != "Index") {
-      p <- p + scale_x_continuous(breaks= 1:sub("L", "", input$version), labels = 1:sub("L", "", input$version))
-    }
-
-    return(p)
-    
   })
 
   ecdf_plot <- reactive({
     if(is.null(input$data) || is.null(input$plot_type) || is.null(input$group))
       return()
 
-    data <- getTableData()
+    data <- getTableDataByGroup()
     
     ave.meth <- get_average_method()
 
@@ -275,18 +331,19 @@ shinyServer(function(input, output) {
       p <- ggplot(data, aes_string(input$plot_data)) + stat_ecdf(geom = "step", colour="darkblue")
 
       if(input$average) {
-        p <- p + geom_vline(aes_string(xintercept=ave.meth(data[[input$plot_data]])),
-            color="darkblue", linetype="dashed")
+        p <- p + geom_vline_interactive(aes_string(xintercept=ave.meth(data[[input$plot_data]])),
+            color="darkblue", linetype="dashed", tooltip = paste0(input$average_method, ": ", get_average_value()), data_id = "ecdf_mean")
       }
            
     } else {
-
-      p <- ggplot(data, aes_string(input$plot_data, colour = input$group)) + stat_ecdf(geom = "step")
-      mu <- aggregate(data[[input$plot_data]], list(group=data[[input$group]]), ave.meth)        
+      colours <- getGroupColours()
+      p <- ggplot(data, aes_string(input$plot_data, colour = input$group)) + 
+        stat_ecdf(geom = "step") + scale_color_manual(values=colours)
+      mu <- get_average_value()        
 
       if(input$average) {
-        p <- p + geom_vline(data=mu, aes_string(xintercept="x", color="group"),
-             linetype="dashed", show.legend=FALSE)
+        p <- p + geom_vline_interactive(data=mu, aes_string(xintercept="x", color="group"),
+             linetype="dashed", show.legend=FALSE, tooltip = paste0(input$average_method, ": ", mu$x), data_id = paste0("ecdf_", input$average_method, "_", mu$group))
       }   
     }
 
@@ -294,6 +351,26 @@ shinyServer(function(input, output) {
 
     return(p)
     
+  })
+  
+  radar_plot <- reactive({
+    if(is.null(input$data) || is.null(input$plot_type) || is.null(input$group))
+      return()
+    
+    data <- getTableDataByGroup()
+    
+    if(input$group=="None" || !input$raw) {
+    
+      data <- data[,names(data) %in% c("MO", "SC", "UA", "PD", "AD")]
+      p <- ggRadar(data=data, rescale=FALSE, colour = "#F8766D", alpha = 0.4)
+    } else {
+      colours <- getGroupColours()
+      data <- data[,names(data) %in% c("MO", "SC", "UA", "PD", "AD", input$group)]
+      p <- ggRadar(data=data,aes_string(color=input$group), rescale=FALSE) + 
+        scale_fill_manual(values=colours) + scale_color_manual(values=colours) +
+        theme(legend.position="right")
+    }
+    return(p)
   })
 
   output$choose_plot_data <- renderUI({
@@ -304,7 +381,7 @@ shinyServer(function(input, output) {
 
   output$choose_plot_type <- renderUI({
     selectInput("plot_type", "Plot type:",
-        c("Density"="density", "ECDF"="ecdf")
+        c("Density"="density", "ECDF"="ecdf", "Radar"="radar")
     )
   })
 
@@ -313,16 +390,35 @@ shinyServer(function(input, output) {
       return()
     }
     data <- getTableData()
-    columns <- colnames(data)
-    columns <- columns[!columns %in% c("MO", "SC", "UA", "PD", "AD", "Index")]
-
+    data <- data[!colnames(data) %in% c("MO", "SC", "UA", "PD", "AD")]
+    data <- data[sapply(data, function(x) is.character(x) || is.logical(x) || is.factor(x))]
+    
     groups <- "None"
-    if(length(columns) > 0) {
-      include <- apply(data[columns], 2, function(x) { length(unique(x))!=length(x)})
+    if(ncol(data) > 0) {
+      include <- apply(data, 2, function(x) {length(unique(x))!=length(x)})
       groups <- c(groups, names(which(include)))
     } 
     selectInput("group", "Group by:",
         groups
+    )
+  })
+  
+  output$choose_group_members <- renderUI({
+
+    if(is.null(input$group) || input$group=="None") {
+      return()
+    }
+    data <- getTableData()
+
+    pickerInput(
+      inputId = "group_member",
+      label = "Select/deselect group members",
+      choices = unique(data[[input$group]]),
+      selected =unique(data[[input$group]]),
+      options = list(
+        `actions-box` = FALSE,
+        `none-selected-text` = "Please select at least one."),
+      multiple = TRUE
     )
   })
   
@@ -334,4 +430,38 @@ shinyServer(function(input, output) {
     }
   })
 
+  get_average_value <- reactive({
+
+    data <- getTableDataByGroup()
+    
+    if(nrow(data)==0)
+      return()
+    
+    ave.meth <- get_average_method()
+    
+    if(input$group == "None") {
+      mu <- aggregate(as.formula(paste(input$plot_data, "~ 1")), data, function(x){round(ave.meth(x),3)})
+    } else {
+      mu <- aggregate(data[[input$plot_data]], list(group=data[[input$group]]), function(x){round(ave.meth(x),3)})
+    }
+    return(mu)
+  })
+  
+  ggplotColours <- function(n = 6, h = c(0, 360) + 15){
+    if ((diff(h) %% 360) < 1) h[2] <- h[2] - 360/n
+    hcl(h = (seq(h[1], h[2], length = n)), c = 100, l = 65)
+  }
+  
+  getGroupColours <- reactive({
+    data <- getTableData()
+    groups <- unique(data[[input$group]])
+    colours <- ggplotColours(length(groups))
+    names(colours) <- groups
+    return(colours)
+  })
+
+  gg_color_hue <- function(n) {
+    hues = seq(15, 375, length = n + 1)
+    hcl(h = hues, l = 65, c = 100)[1:n]
+  }
 })

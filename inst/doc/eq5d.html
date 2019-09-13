@@ -12,7 +12,7 @@
 
 <meta name="author" content="Fraser Morton and Jagtar Singh Nijjar" />
 
-<meta name="date" content="2019-06-27" />
+<meta name="date" content="2019-09-12" />
 
 <title>Calculating EQ-5D indices with eq5d</title>
 
@@ -95,7 +95,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Calculating EQ-5D indices with eq5d</h1>
 <h4 class="author">Fraser Morton and Jagtar Singh Nijjar</h4>
-<h4 class="date">27 June 2019</h4>
+<h4 class="date">12 September 2019</h4>
 
 
 
@@ -155,13 +155,13 @@ scores.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
 
 <span class="co"># Return VAS based value sets (top 6 returned for brevity).</span>
 <span class="kw">head</span>(<span class="kw">valuesets</span>(<span class="dt">type=</span><span class="st">&quot;VAS&quot;</span>))
-<span class="co">#&gt;    Version Type    Country</span>
-<span class="co">#&gt; 1 EQ-5D-3L  VAS    Belgium</span>
-<span class="co">#&gt; 2 EQ-5D-3L  VAS    Denmark</span>
-<span class="co">#&gt; 3 EQ-5D-3L  VAS     Europe</span>
-<span class="co">#&gt; 4 EQ-5D-3L  VAS    Finland</span>
-<span class="co">#&gt; 5 EQ-5D-3L  VAS    Germany</span>
-<span class="co">#&gt; 6 EQ-5D-3L  VAS NewZealand</span>
+<span class="co">#&gt;    Version Type Country</span>
+<span class="co">#&gt; 1 EQ-5D-3L  VAS Belgium</span>
+<span class="co">#&gt; 2 EQ-5D-3L  VAS Denmark</span>
+<span class="co">#&gt; 3 EQ-5D-3L  VAS  Europe</span>
+<span class="co">#&gt; 4 EQ-5D-3L  VAS Finland</span>
+<span class="co">#&gt; 5 EQ-5D-3L  VAS Germany</span>
+<span class="co">#&gt; 6 EQ-5D-3L  VAS    Iran</span>
 
 <span class="co"># Return EQ-5D-5L value sets (top 6 returned for brevity).</span>
 <span class="kw">head</span>(<span class="kw">valuesets</span>(<span class="dt">version=</span><span class="st">&quot;5L&quot;</span>))
@@ -182,7 +182,7 @@ scores.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
 </div>
 <div id="shiny-web-interface" class="section level2">
 <h2>Shiny web interface</h2>
-<p>The calculation (and visualisation) of multiple EQ-5D indices can also be performed by upload of a CSV or Excel file using the packaged <a href="https://shiny.rstudio.com">Shiny</a> app. This requires the <a href="https://cran.r-project.org/package=shiny">shiny</a>, <a href="https://cran.r-project.org/package=DT">DT</a>, <a href="https://cran.r-project.org/package=ggplot2">ggplot2</a>, <a href="https://cran.r-project.org/package=mime">mime</a> and <a href="https://cran.r-project.org/package=readxl">readxl</a> packages. The CSV/Excel headers should be the same as the names of the vector passed to the <strong><em>eq5d</em></strong> function i.e. MO, SC, UA, PD and AD. The app is launched using the <strong><em>shiny_eq5d</em></strong> function.</p>
+<p>The calculation (and visualisation) of multiple EQ-5D indices can also be performed by upload of a CSV or Excel file using the packaged <a href="https://shiny.rstudio.com">Shiny</a> app. This requires the <a href="https://cran.r-project.org/package=shiny">shiny</a>, <a href="https://cran.r-project.org/package=DT">DT</a>, <a href="https://cran.r-project.org/package=ggplot2">ggplot2</a>, <a href="https://cran.r-project.org/package=ggiraph">ggiraph</a>, <a href="https://cran.r-project.org/package=ggiraphExtra">ggiraphExtra</a>, <a href="https://cran.r-project.org/package=mime">mime</a> and <a href="https://cran.r-project.org/package=readxl">readxl</a> packages. The CSV/Excel headers should be the same as the names of the vector passed to the <strong><em>eq5d</em></strong> function i.e. MO, SC, UA, PD and AD. The app is launched using the <strong><em>shiny_eq5d</em></strong> function.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">shiny_eq5d</span>()</code></pre></div>
 <p>Alternatively, it can be accessed without installing R/Shiny/eq5d by visiting <a href="https://fragla.shinyapps.io/shiny-eq5d">shinyapps.io</a>.</p>
 </div>

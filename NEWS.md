@@ -1,5 +1,23 @@
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+eq5d 0.3.0 (2019-09-12)
+=======================
+
+-   Added Iran and Malaysia EQ-5D-3L VAS value sets
+
+-   Added Singapore EQ-5D-3L TTO value set.
+
+-   Added USA EQ-5D-5L value set.
+
+-   Updates to shiny application
+    -   New navbar layout
+    -   Added radar plot.
+    -   Ability to customise plots by adding/removing specific data groups.
+    -   Tool tips added means/medians of density/ecdf plots.
+    -   shinycssloader icons used when waiting for a plot to load in shiny.
+    -   Download button added to plots page.
+    -   Help/FAQ page added.
+
 eq5d 0.2.0 (2019-06-27)
 =======================
 
