@@ -1,9 +1,20 @@
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+eq5d 0.4.0 (2019-11-12)
+=======================
+
+-   Added Polish and Portuguese EQ-5D-5L value sets.
+
+-   Added Argentinian, Australian, Chinese, Sri Lankan and Swedish EQ-5D-3L TTO value sets.
+
+-   Functionality added to handle dimension scores in five digit format e.g. 12321
+
+-   Speed improvements when calculating multiple index scores.
+
 eq5d 0.3.0 (2019-09-12)
 =======================
 
--   Added Iran and Malaysia EQ-5D-3L VAS value sets
+-   Added Iran and Malaysia EQ-5D-3L VAS value sets.
 
 -   Added Singapore EQ-5D-3L TTO value set.
 

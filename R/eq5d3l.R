@@ -31,11 +31,13 @@ eq5d3l <- function(scores, type="TTO", country="UK") {
   
   survey <- survey[country]
 
-  values <- c(.minOne2Or3(scores, survey), .minOne3(scores, survey), .dimensionScores(scores, survey), .ordinalScore(scores, survey))
+  values <- c(survey["FullHealth",], .minOne2Or3(scores, survey), .minOne3(scores, survey), .dimensionScores(scores, survey), .ordinalScore(scores, survey), .interactions(scores, survey))
   index <- NULL
-
+  
   if(type=="VAS" && country=="Germany") {
     index <- .eq5d3l.mult(values)
+  } else if(country=="Australia" && type=="TTO" && .collapseScore(scores) %in% names(.australiaImplausible())) {
+    index <- as.numeric(.australiaImplausible()[[.collapseScore(scores)]])
   } else {
     index <- .eq5d3l.add(values)
   }
@@ -44,7 +46,7 @@ eq5d3l <- function(scores, type="TTO", country="UK") {
 }
 
 .eq5d3l.add <- function(values) {
-  1+sum(values, na.rm = TRUE)
+  sum(values, na.rm = TRUE)
 }
 
 .eq5d3l.mult <- function(values) {
@@ -198,3 +200,40 @@ eq5d3l <- function(scores, type="TTO", country="UK") {
   return(x)
 }
 
+.interactions <- function(scores, survey) {
+  INTERACTIONS <- c("MO2SC2", "MO2SC3", "MO2UA2", "MO2UA3", "MO2PD2", "MO2PD3", 
+                    "MO2AD2", "MO2AD3", "MO3SC3", "MO3UA3", "MO3PD2", "MO3PD3", 
+                    "MO3AD2", "MO3AD3", "SC2UA2", "SC2UA3", "SC2PD2", "SC2PD3", 
+                    "SC2AD2", "SC2AD3", "SC3UA2", "SC3UA3", "SC3PD2", "SC3PD3", 
+                    "SC3AD2", "SC3AD3", "UA2PD2", "UA2PD3", "UA2AD2", "UA2AD3", 
+                    "UA3PD2", "UA3PD3", "UA3AD2", "UA3AD3", "PD2AD2", "PD2AD3", 
+                    "PD3AD2", "PD3AD3")
+  
+  score.dimensions <- paste0(names(scores), scores)
+  interactions <- INTERACTIONS[which(!is.na(survey[INTERACTIONS,]))]
+  
+  if(length(interactions) > 0) {
+    interaction.pairs <- sapply(interactions, function(x) {
+      pairs <- strsplit(gsub("([[:digit:]])([[:upper:]])", "\\1 \\2", x, " ")," ")
+      lapply(pairs, function(y){
+        all(y %in% score.dimensions)
+      })
+    })
+    interaction.pairs <- unlist(interaction.pairs)
+    interaction.present <- which(interaction.pairs)
+    
+    if(length(interaction.present) > 0) {
+      return(survey[names(interaction.present),])
+    }
+  }
+}
+
+.australiaImplausible <- function() {
+  implausible <- c(0.154, 0.101, 0.154, 0.101, 0.02, 0.02, 0.086, 0.033, 0.086, 0.033, -0.048, -0.048, -0.083, -0.136, -0.206, -0.045, -0.083, -0.098, -0.136, -0.199, -0.217, -0.217)
+  names(implausible) <- c("12133", "12233", "13133", "13233", "13332", "13333", "22133", "22233", "23133", "23233", "23332", "23333", "32133", "32233", "32333", "33132", "33133", "33232", "33233", "33323", "33332", "33333")
+  return(implausible)
+}
+
+.collapseScore <- function(score) {
+  return(paste(score, collapse=""))
+}

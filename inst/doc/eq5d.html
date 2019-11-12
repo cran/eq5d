@@ -7,12 +7,13 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="author" content="Fraser Morton and Jagtar Singh Nijjar" />
 
-<meta name="date" content="2019-09-12" />
+<meta name="date" content="2019-11-12" />
 
 <title>Calculating EQ-5D indices with eq5d</title>
 
@@ -70,7 +71,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
       if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -95,7 +96,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Calculating EQ-5D indices with eq5d</h1>
 <h4 class="author">Fraser Morton and Jagtar Singh Nijjar</h4>
-<h4 class="date">12 September 2019</h4>
+<h4 class="date">12 November 2019</h4>
 
 
 
@@ -131,13 +132,24 @@ scores &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">
 <span class="kw">eq5d</span>(<span class="dt">scores=</span>scores, <span class="dt">country=</span><span class="st">&quot;UK&quot;</span>, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;TTO&quot;</span>)
 <span class="co">#&gt; [1] 0.329</span>
 
-<span class="co">#multiple calculations</span>
+<span class="co">#Using five digit format</span>
+<span class="kw">eq5d</span>(<span class="dt">scores=</span><span class="dv">12321</span>, <span class="dt">country=</span><span class="st">&quot;UK&quot;</span>, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;TTO&quot;</span>)
+<span class="co">#&gt; [1] 0.329</span>
+
+<span class="co">#multiple calculations using the Canadian VT value set</span>
+
+<span class="co">#data.frame with individual dimensions</span>
 scores.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
   <span class="dt">MO=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>), <span class="dt">SC=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>), <span class="dt">UA=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>), <span class="dt">PD=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">4</span>), <span class="dt">AD=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>)
 )
 
-<span class="co">#EQ-5D-5L using the Canadian VT value set</span>
 <span class="kw">eq5d</span>(scores.df, <span class="dt">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;VT&quot;</span>)
+<span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span>
+
+<span class="co">#data.frame using five digit format</span>
+scores.df2 &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">state=</span><span class="kw">c</span>(<span class="dv">11111</span>,<span class="dv">25532</span>,<span class="dv">34241</span>,<span class="dv">43332</span>,<span class="dv">52141</span>))
+
+<span class="kw">eq5d</span>(scores.df2, <span class="dt">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;VT&quot;</span>)
 <span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></code></pre></div>
 </div>
 <div id="value-sets" class="section level2">
@@ -145,13 +157,13 @@ scores.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
 <p>The available value sets can be viewed using the <strong><em>valuesets</em></strong> function. The results can be filtered by EQ-5D version, value set type or by country.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Return all value sets (top 6 returned for brevity).</span>
 <span class="kw">head</span>(<span class="kw">valuesets</span>())
-<span class="co">#&gt;    Version Type Country</span>
-<span class="co">#&gt; 1 EQ-5D-3L  TTO  Brazil</span>
-<span class="co">#&gt; 2 EQ-5D-3L  TTO  Canada</span>
-<span class="co">#&gt; 3 EQ-5D-3L  TTO   Chile</span>
-<span class="co">#&gt; 4 EQ-5D-3L  TTO Denmark</span>
-<span class="co">#&gt; 5 EQ-5D-3L  TTO  France</span>
-<span class="co">#&gt; 6 EQ-5D-3L  TTO Germany</span>
+<span class="co">#&gt;    Version Type   Country</span>
+<span class="co">#&gt; 1 EQ-5D-3L  TTO Argentina</span>
+<span class="co">#&gt; 2 EQ-5D-3L  TTO Australia</span>
+<span class="co">#&gt; 3 EQ-5D-3L  TTO    Brazil</span>
+<span class="co">#&gt; 4 EQ-5D-3L  TTO    Canada</span>
+<span class="co">#&gt; 5 EQ-5D-3L  TTO     Chile</span>
+<span class="co">#&gt; 6 EQ-5D-3L  TTO     China</span>
 
 <span class="co"># Return VAS based value sets (top 6 returned for brevity).</span>
 <span class="kw">head</span>(<span class="kw">valuesets</span>(<span class="dt">type=</span><span class="st">&quot;VAS&quot;</span>))
@@ -182,12 +194,16 @@ scores.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
 </div>
 <div id="shiny-web-interface" class="section level2">
 <h2>Shiny web interface</h2>
-<p>The calculation (and visualisation) of multiple EQ-5D indices can also be performed by upload of a CSV or Excel file using the packaged <a href="https://shiny.rstudio.com">Shiny</a> app. This requires the <a href="https://cran.r-project.org/package=shiny">shiny</a>, <a href="https://cran.r-project.org/package=DT">DT</a>, <a href="https://cran.r-project.org/package=ggplot2">ggplot2</a>, <a href="https://cran.r-project.org/package=ggiraph">ggiraph</a>, <a href="https://cran.r-project.org/package=ggiraphExtra">ggiraphExtra</a>, <a href="https://cran.r-project.org/package=mime">mime</a> and <a href="https://cran.r-project.org/package=readxl">readxl</a> packages. The CSV/Excel headers should be the same as the names of the vector passed to the <strong><em>eq5d</em></strong> function i.e. MO, SC, UA, PD and AD. The app is launched using the <strong><em>shiny_eq5d</em></strong> function.</p>
+<p>The calculation (and visualisation) of multiple EQ-5D indices can also be performed by upload of a CSV or Excel file using the packaged <a href="https://shiny.rstudio.com">Shiny</a> app. This requires the <a href="https://cran.r-project.org/package=shiny">shiny</a>, <a href="https://cran.r-project.org/package=DT">DT</a>, <a href="https://cran.r-project.org/package=ggplot2">ggplot2</a>, <a href="https://cran.r-project.org/package=ggiraph">ggiraph</a>, <a href="https://cran.r-project.org/package=ggiraphExtra">ggiraphExtra</a>, <a href="https://cran.r-project.org/package=mime">mime</a> and <a href="https://cran.r-project.org/package=readxl">readxl</a> packages. The CSV/Excel headers should be the same as the names of the vector passed to the <strong><em>eq5d</em></strong> function i.e. MO, SC, UA, PD and AD or the column name “State” if using the five digit format.</p>
+<p>The app is launched using the <strong><em>shiny_eq5d</em></strong> function.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">shiny_eq5d</span>()</code></pre></div>
 <p>Alternatively, it can be accessed without installing R/Shiny/eq5d by visiting <a href="https://fragla.shinyapps.io/shiny-eq5d">shinyapps.io</a>.</p>
 </div>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
