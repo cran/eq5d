@@ -1,67 +1,97 @@
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
-eq5d 0.4.0 (2019-11-12)
-=======================
 
--   Added Polish and Portuguese EQ-5D-5L value sets.
+# eq5d 0.5.0 (2019-12-15)
 
--   Added Argentinian, Australian, Chinese, Sri Lankan and Swedish EQ-5D-3L TTO value sets.
+  - Wilcoxon rank sum test and Kruskal-Wallis/Dunn tests added to shiny
+    application.
 
--   Functionality added to handle dimension scores in five digit format e.g. 12321
+  - Wilcoxon signed rank test and Friedman/Nemenyi tests also added for
+    paired data.
 
--   Speed improvements when calculating multiple index scores.
+  - Added Ethiopian EQ-5D-5L value set.
 
-eq5d 0.3.0 (2019-09-12)
-=======================
+  - Added ignore.incomplete option to eq5d function to skip incomplete
+    scores.
 
--   Added Iran and Malaysia EQ-5D-3L VAS value sets.
+  - Added dimensions and five.digit options to eq5d function to change
+    default column names when using data.frames.
 
--   Added Singapore EQ-5D-3L TTO value set.
+  - Addressed the noLD unit test issues in the previous version.
 
--   Added USA EQ-5D-5L value set.
+# eq5d 0.4.0 (2019-11-12)
 
--   Updates to shiny application
-    -   New navbar layout
-    -   Added radar plot.
-    -   Ability to customise plots by adding/removing specific data groups.
-    -   Tool tips added means/medians of density/ecdf plots.
-    -   shinycssloader icons used when waiting for a plot to load in shiny.
-    -   Download button added to plots page.
-    -   Help/FAQ page added.
+  - Added Polish and Portuguese EQ-5D-5L value sets.
 
-eq5d 0.2.0 (2019-06-27)
-=======================
+  - Added Argentinian, Australian, Chinese, Sri Lankan and Swedish
+    EQ-5D-3L TTO value sets.
 
--   Added Brazilian, Canadian, Chilean, Polish, Portuguese, Taiwanese and Trinidad and Tobago EQ-5D-3L TTO value sets.
+  - Functionality added to handle dimension scores in five digit format
+    e.g. 12321
 
--   Added Taiwanese EQ-5D-5L VT value set.
+  - Speed improvements when calculating multiple index scores.
 
--   Example data added to shiny app.
+# eq5d 0.3.0 (2019-09-12)
 
--   Plots tab and ggplot2 density and ecdf plots added to shiny app.
+  - Added Iran and Malaysia EQ-5D-3L VAS value sets.
 
--   Added functionality to shiny app to calculate a single index score.
+  - Added Singapore EQ-5D-3L TTO value set.
 
--   Notification added to shiny app to warn when EQ-5D-5L is selected, but all uploaded values are 1, 2 or 3.
+  - Added USA EQ-5D-5L value set.
 
-eq5d 0.1.1 (2019-05-27)
-=======================
+  - Updates to shiny application
+    
+      - New navbar layout
+      - Added radar plot.
+      - Ability to customise plots by adding/removing specific data
+        groups.
+      - Tool tips added means/medians of density/ecdf plots.
+      - shinycssloader icons used when waiting for a plot to load in
+        shiny.
+      - Download button added to plots page.
+      - Help/FAQ page added.
 
--   Fixed issue where displayed description values were mislabelled in the Shiny app table when the columns in the uploaded file weren't in the order MO, SC, UA, PD, AD.
+# eq5d 0.2.0 (2019-06-27)
 
--   Fixed issue with Shiny app download button not working correctly.
+  - Added Brazilian, Canadian, Chilean, Polish, Portuguese, Taiwanese
+    and Trinidad and Tobago EQ-5D-3L TTO value sets.
 
--   Added checkbox to Shiny app to give the option of displaying the index scores with all info provided in the uploaded file or just with the dimension scores.
+  - Added Taiwanese EQ-5D-5L VT value set.
 
-eq5d 0.1.0 (2019-05-10)
-=======================
+  - Example data added to shiny app.
 
--   Functions for calculating EQ-5D index values.
+  - Plots tab and ggplot2 density and ecdf plots added to shiny app.
 
--   EQ-5D-3L TTO value sets for Denmark, France, Germany, Italy, Japan, Korea, Netherlands, Spain, Thailand, UK, USA and Zimbabwe.
+  - Added functionality to shiny app to calculate a single index score.
 
--   EQ-5D-3L VAS value sets for Belgium, Denmark, Europe, Finland, Germany, NewZealand, Slovenia, Spain and UK.
+  - Notification added to shiny app to warn when EQ-5D-5L is selected,
+    but all uploaded values are 1, 2 or 3.
 
--   EQ-5D-5L VT value sets for Canada, China, England, Germany, HongKong, Indonesia, Ireland, Japan, Korea, Malaysia, Netherlands, Spain, Thailand and Uruguay.
+# eq5d 0.1.1 (2019-05-27)
 
--   EQ-5D-5L Crosswalk value sets for Denmark, France, Germany, Japan, Netherlands, Spain, Thailand, UK, USA and Zimbabwe.
+  - Fixed issue where displayed description values were mislabelled in
+    the Shiny app table when the columns in the uploaded file weren’t in
+    the order MO, SC, UA, PD, AD.
+
+  - Fixed issue with Shiny app download button not working correctly.
+
+  - Added checkbox to Shiny app to give the option of displaying the
+    index scores with all info provided in the uploaded file or just
+    with the dimension scores.
+
+# eq5d 0.1.0 (2019-05-10)
+
+  - Functions for calculating EQ-5D index values.
+
+  - EQ-5D-3L TTO value sets for Denmark, France, Germany, Italy, Japan,
+    Korea, Netherlands, Spain, Thailand, UK, USA and Zimbabwe.
+
+  - EQ-5D-3L VAS value sets for Belgium, Denmark, Europe, Finland,
+    Germany, NewZealand, Slovenia, Spain and UK.
+
+  - EQ-5D-5L VT value sets for Canada, China, England, Germany,
+    HongKong, Indonesia, Ireland, Japan, Korea, Malaysia, Netherlands,
+    Spain, Thailand and Uruguay.
+
+  - EQ-5D-5L Crosswalk value sets for Denmark, France, Germany, Japan,
+    Netherlands, Spain, Thailand, UK, USA and Zimbabwe.

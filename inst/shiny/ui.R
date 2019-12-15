@@ -20,8 +20,8 @@ shinyUI(
           uiOutput("include_raw_data"),
           hr(),
           h5("Example data"),
-          p("EQ-5D-3L example data:", a(img(src="images/icons8-microsoft-excel-48.png", height = 24, width = 24), href="data/eq5d3l_example.xlsx", target="_blank"), style="margin-bottom:0"),
-          p("EQ-5D-5L example data:", a(img(src="images/icons8-microsoft-excel-48.png", height = 24, width = 24), href="data/eq5d5l_example.xlsx", target="_blank"), style="margin-top:0")
+          p("EQ-5D-3L example data:", a(img(src="images/icons8-microsoft-excel-48.png", height = 24, width = 24), href="example-data/eq5d3l_example.xlsx", target="_blank"), style="margin-bottom:0"),
+          p("EQ-5D-5L example data:", a(img(src="images/icons8-microsoft-excel-48.png", height = 24, width = 24), href="example-data/eq5d5l_example.xlsx", target="_blank"), style="margin-bottom:0")
         )
       ),
       mainPanel(
@@ -37,7 +37,7 @@ shinyUI(
         )
       )
     ),
-    tabPanel("Plots",
+    tabPanel("Analysis",
       sidebarPanel(
         conditionalPanel(
           condition = "input.plot_type != 'radar'",
@@ -53,12 +53,25 @@ shinyUI(
           condition = "input.plot_type != 'radar'",
           uiOutput("show_average"),
           uiOutput("choose_average_method")
-        )
+        ),
+        uiOutput("show_paired")
       ),
       mainPanel(
-        withSpinner(ggiraphOutput("plot")),
-        uiOutput("export_plot")
-      )     
+        column(8, 
+            withSpinner(ggiraphOutput("plot")),
+            uiOutput("export_plot")
+        ),
+        column(4, 
+            h4("Statistical analysis"),
+            uiOutput("statistics")
+        )
+      )
+    ),
+    tabPanel("Settings",
+             div(style="padding-left:20%;padding-right:20%;",
+                 h3("Error handling"),
+                 uiOutput("ignore_incomplete")
+             )
     ),
     tabPanel("Help/FAQs",
       div(style="padding-left:20%;padding-right:20%;",
@@ -84,7 +97,20 @@ shinyUI(
           dimensions. If the uploaded data included additional categorical  
           information, it is possible to incorporate this information into the plots. 
           To do this select the category from the 'Group by' drop down menu on the 
-          plots page."),
+          plots page. This information will also be used in the automated statistical 
+          analysis. "),
+        h4("My EQ-5D data is missing/incomplete. What should I do?"),
+        p("The application will automatically skip missing/incomplete EQ-5D data. If 
+          you wish to turn this feature off (and receive an error) you can do so by 
+          deselecting the 'Ignore data with incomplete/missing dimension scores' 
+          checkbox in the 'Settings' tab."),
+        h4("What statistical analyses are performed?"),
+        p("The statistical tests performed depend on the data and the category selected 
+          in the 'Group by' drop down. The statistical tests that can be performed can be
+          seen in the table below. The application will automatically try to determine 
+          whether the data are paired. Paired testing may be switched off using the 'Data 
+          are paired' checkbox."),
+          tableOutput("stats_tests"),
         h4("What does 'Unable to identify EQ-5D dimensions in the file header' mean?"),
         p("This means it's not been possible for the software to find all of the 
           EQ-5D dimensions in the header of the uploaded file. This could be for a 

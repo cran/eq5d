@@ -6,8 +6,12 @@ library(ggplot2)
 library(ggiraph)
 library(ggiraphExtra)
 library(shinyWidgets)
+library(FSA)
+library(PMCMRplus)
 
 options(shiny.sanitize.errors = FALSE)
+
+addResourcePath('example-data', system.file("extdata", package="eq5d"))
 
 shinyServer(function(input, output) {
   
@@ -100,6 +104,38 @@ shinyServer(function(input, output) {
     checkboxInput("raw", "Include all submitted data in table", TRUE)
   })
 
+  getPaired <- reactive({
+    data <- getTableDataByGroup()
+    group.totals <- table(data[input$group])
+    
+    data <- data[!colnames(data) %in% c(getDimensionNames(), "Index", input$group)]
+    if(ncol(data) > 0) {
+      id.columns <- lapply(data, function(x){
+        id.totals <- table(x)
+        length(unique(id.totals))==1 & length(unique(group.totals))==1 & sum(id.totals)==sum(group.totals)
+      })
+      return(names(id.columns)[which(unlist(id.columns))])
+    }
+  })
+  
+  output$show_paired <- renderUI({
+    if(!is.null(input$group) && input$group != "None") { 
+      if(length(getPaired())==0)
+        return()
+      
+      data <- getTableData()
+      data <- data[!colnames(data) %in% c(getDimensionNames(), "Index", input$group)]
+      id.groups <- getPaired()
+      if(!is.null(id.groups)) {
+        tagList(
+          checkboxInput("paired", "Data are paired", TRUE),
+          selectInput("id", "ID column:", 
+                      choices=id.groups, selected=FALSE, selectize = FALSE)
+        )
+      }
+    }
+  })
+  
   output$show_average <- renderUI({
     checkboxInput("average", "Show mean/median on plot", TRUE)
   })
@@ -199,10 +235,17 @@ shinyServer(function(input, output) {
     }
     
     if(length(idx)==1) {
+      length.check <- sapply(dat[[idx]], nchar)
+      if(any(is.na(length.check)|length.check!=5)) {
+        if(ignoreIncomplete()) {
+          dat[which(length.check!=5),idx] <- NA
+        } else {
+          stop("States identified without five digits.")
+        }
+      }
       dat <- as.data.frame(do.call(rbind, strsplit(as.character(dat[[idx]]), "")))
       colnames(dat) <- c("MO", "SC", "UA", "PD", "AD")
       dat <- as.data.frame(apply(dat, 2, function(x) as.numeric(as.character(x))))
-      
     } else {
       dat <- dat[idx]
     }
@@ -231,7 +274,7 @@ shinyServer(function(input, output) {
   }
   
   getTableData <- reactive({
-    eq5d <- eq5d(dataset(), version=input$version, type=input$type, country=input$country)
+    eq5d <- eq5d(dataset(), version=input$version, type=input$type, country=input$country, ignore.incomplete=ignoreIncomplete())
     if(input$raw) {
       if(all(getDimensionNames() %in% colnames(rawdata()))) {
         res <- cbind(rawdata(), eq5d)
@@ -247,12 +290,18 @@ shinyServer(function(input, output) {
   
   getTableDataByGroup <- reactive({
     data <- getTableData()
+    data <- data[!is.na(data[[input$plot_data]]),]
     
-    if(input$group != "None") {
+    if(!is.null(input$group) && input$group != "None") {
       data <- data[which(data[,input$group] %in% input$group_member),]
     }
     
     return(data)
+  })
+  
+  ignoreIncomplete <- reactive({
+    ignore.incomplete <- ifelse(is.null(input$ignore_incomplete), TRUE, input$ignore_incomplete)
+    return(ignore.incomplete)
   })
 
   output$plot <- renderggiraph({
@@ -399,7 +448,7 @@ shinyServer(function(input, output) {
       return()
     }
     data <- getTableData()
-    data <- data[!colnames(data) %in% getDimensionNames()]
+    data <- data[!tolower(colnames(data)) %in% tolower(c(getDimensionNames(), "State"))]
     data <- data[sapply(data, function(x) is.character(x) || is.logical(x) || is.factor(x))]
     
     groups <- "None"
@@ -429,6 +478,128 @@ shinyServer(function(input, output) {
         `none-selected-text` = "Please select at least one."),
       multiple = TRUE
     )
+  })
+  
+  getStatistics <- reactive({
+    if(is.null(input$group) || input$group=="None") {
+      return()
+    }
+    
+    data <- getTableDataByGroup()
+    stats <- NULL
+    if(length(input$group_member)==2) {
+      stats <- getWilcoxStats()
+    } else if (length(input$group_member) > 2) {
+      if(!is.null(getPaired()) & length(getPaired()) > 0 & !is.null(input$paired) && input$paired) {
+        print("Friedman")
+        stats <- getFriedmanStats()
+      } else {
+        print("Kruskal")
+        stats <- getKruskalStats()
+      }
+    }
+    return(stats)
+  })
+  
+  output$statistics <- renderUI({
+    
+    stats <- getStatistics()
+    if(is.null(stats))
+      return("Select a group to perform statistical tests.")
+    
+    taglist <- tagList(
+      h5(stats$method),
+      p(paste("Data", stats$data.name)),
+      p(paste0(names(stats$statistic), " = ", round(stats$statistic,1))),
+      p("p.value = ", round(stats$p.value,5))
+    )
+    if(length(input$group_member) > 2 & stats$p.value < 0.05) {
+      taglist[[length(taglist)+1]] <- actionButton("posthoc","View post hoc tests")
+    }
+    return(taglist)
+  })
+  
+  output$posthocTable <- renderDataTable({
+    stats <- getStatistics()
+    table <- data.frame(lapply(stats$posthoc$res, function(y) if(is.numeric(y)) round(y, 5) else y))
+    datatable(table)
+  })
+  
+  observeEvent(input$posthoc,{
+    stats <- getStatistics()
+    showModal(
+      modalDialog(
+        h2("Post hoc tests"),
+        p(stats$posthoc$method),
+        DT::dataTableOutput('posthocTable'),
+        uiOutput("export_posthoc"),
+        size = "m"
+      )
+    )
+  })
+  
+  getWilcoxStats <- reactive({
+    data <- getTableDataByGroup()
+    paired <- FALSE
+    if(!is.null(getPaired()) & length(getPaired()) > 0 & !is.null(input$paired) && input$paired) {
+      data <- data[order(data[input$id], data[input$group]),]
+      paired <- TRUE
+    }
+    res <- wilcox.test(as.formula(paste(input$plot_data," ~ ", input$group)), data, paired=paired)
+    return(res)
+  })
+  
+  getKruskalStats <- reactive({
+    data <- getTableDataByGroup()
+    res <- kruskal.test(as.formula(paste(input$plot_data," ~ ", input$group)), data)
+    
+    if(res$p.value < 0.05) {
+      res$posthoc <- dunnTest(as.formula(paste(input$plot_data," ~ ", input$group)), data)
+      res$posthoc$method <- paste("Dunn's test with", res$posthoc$method, "correction")
+    }
+    return(res)
+  })
+  
+  getFriedmanStats <- reactive({
+    data <- getTableDataByGroup()
+    res <- friedman.test(as.formula(paste(input$plot_data, " ~ ", input$group, " | ", input$id)),
+                  data = data)
+    if(res$p.value < 0.05) {
+      nt <- frdAllPairsNemenyiTest(as.formula(paste(input$plot_data, " ~ ", input$group, " | ", input$id)), data)
+      nt.stats <- na.omit(as.data.frame(as.table(nt$statistic)))
+      nt.p.value <- na.omit(as.data.frame(as.table(nt$p.value)))
+      nt$res <- data.frame(Comparison=paste(nt.stats$Var2, "-", nt.stats$Var1), "Mean rank diff"=nt.stats$Freq, P.adj=nt.p.value$Freq)
+      nt$method <- paste("Nemenyi test with", nt$p.adjust.method, "correction")
+      res$posthoc <- nt
+    }
+    return(res)
+  })
+  
+  output$export_posthoc <- renderUI({
+      downloadButton("download_posthoc", 'Download Post Hoc Data')
+  })
+  
+  output$download_posthoc <- downloadHandler(
+    filename = function() {
+      paste(input$version, "_", input$country, "_", input$type, "_post_hoc_", format(Sys.time(), "%Y%m%d%H%M%S"), ".csv", sep = "")
+    },
+    content = function(file) {
+      stats <- getStatistics()
+      write.csv(stats$posthoc$res, file, row.names = FALSE)
+    }
+  )
+  
+  output$ignore_incomplete <- renderUI({
+    checkboxInput("ignore_incomplete", "Ignore data with incomplete/missing dimension scores", TRUE)
+  })
+  
+  output$stats_tests <- renderTable({
+
+      data.frame(Groups=c(2, 2, ">2", ">2"),
+                 Paired=c("No", "Yes", "No", "Yes"),
+                 Test=c("Wilcoxon rank sum test", "Wilcoxon signed rank test",
+                        "Kruskal-Wallis rank sum test with Dunn's test for post hoc testing.", "Friedman's rank sum test with the Nemenyi test for post hoc testing."))
+
   })
   
   get_average_method <- reactive({

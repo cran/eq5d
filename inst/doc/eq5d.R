@@ -1,10 +1,10 @@
-## ---- include = FALSE----------------------------------------------------
+## ---- include = FALSE---------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 
-## ----quickStart----------------------------------------------------------
+## ----quickStart---------------------------------------------------------------
 library(eq5d)
 
 #single calculation
@@ -30,10 +30,10 @@ eq5d(scores.df, country="Canada", version="5L", type="VT")
 #data.frame using five digit format
 scores.df2 <- data.frame(state=c(11111,25532,34241,43332,52141))
 
-eq5d(scores.df2, country="Canada", version="5L", type="VT")
+eq5d(scores.df2, country="Canada", version="5L", type="VT", five.digit="state")
 
 
-## ----valuesets-----------------------------------------------------------
+## ----valuesets----------------------------------------------------------------
 # Return all value sets (top 6 returned for brevity).
 head(valuesets())
 
@@ -46,6 +46,20 @@ head(valuesets(version="5L"))
 # Return all UK value sets.
 valuesets(country="UK")
 
-## ----shiny, echo=TRUE, eval=FALSE----------------------------------------
+## ----example data-------------------------------------------------------------
+# View example files.
+dir(path=system.file("extdata", package="eq5d"))
+
+# Read example EQ-5D-3L data.
+library(readxl)
+data <- read_excel(system.file("extdata", "eq5d3l_example.xlsx", package="eq5d"))
+
+# Calculate index scores
+scores <- eq5d(data, country="UK", version="3L", type="TTO")
+
+# Top 6 scores
+head(scores)
+
+## ----shiny, echo=TRUE, eval=FALSE---------------------------------------------
 #  shiny_eq5d()
 
