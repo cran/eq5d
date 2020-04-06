@@ -117,6 +117,11 @@ scores.df2 <- data.frame(state=c(11111,25532,34241,43332,52141))
 
 eq5d(scores.df2, country="Canada", version="5L", type="VT", five.digit="state")
 #> [1] 0.949 0.362 0.390 0.524 0.431
+
+#or using a vector
+
+eq5d(scores.df2$state, country="Canada", version="5L", type="VT")
+#> [1] 0.949 0.362 0.390 0.524 0.431
 ```
 
 ## Value sets
@@ -164,6 +169,72 @@ valuesets(country="UK")
 #> 3 EQ-5D-5L   CW      UK
 ```
 
+## EQ-5D-DS
+
+The ***eq5dds*** function is an R approximation of the Stata command
+written by [Ramos-Goñi &
+Ramallo-Fariña](https://www.stata-journal.com/article.html?article=st0450).
+The function analyses and summarises the descriptive components of an
+EQ-5D dataset. The “by” argument enables a grouping variable to be
+specified when analysing the data subgroup.
+
+``` r
+
+dat <- data.frame(
+         matrix(
+           sample(1:3,5*12, replace=TRUE),12,5, 
+           dimnames=list(1:12,c("MO","SC","UA","PD","AD"))
+         ),
+         Sex=rep(c("Male", "Female"))
+       )
+
+eq5dds(dat, version="3L")
+#>     MO   SC UA   PD   AD
+#> 1 25.0 50.0 25 16.7 33.3
+#> 2  8.3 41.7 50 41.7 41.7
+#> 3 66.7  8.3 25 41.7 25.0
+
+eq5dds(dat, version="3L", counts=TRUE)
+#>   MO SC UA PD AD
+#> 1  3  6  3  2  4
+#> 2  1  5  6  5  5
+#> 3  8  1  3  5  3
+
+eq5dds(dat, version="3L", by="Sex")
+#> data[, by]: Female
+#>     MO   SC   UA   PD   AD
+#> 1 33.3 33.3 33.3 16.7 50.0
+#> 2 16.7 66.7 50.0 50.0 33.3
+#> 3 50.0  0.0 16.7 33.3 16.7
+#> ------------------------------------------------------------ 
+#> data[, by]: Male
+#>     MO   SC   UA   PD   AD
+#> 1 16.7 66.7 16.7 16.7 16.7
+#> 2  0.0 16.7 50.0 33.3 50.0
+#> 3 83.3 16.7 33.3 50.0 33.3
+```
+
+## Helper functions
+
+Helper functions are included, which may be useful in the processing of
+EQ-5D data. ***getHealthStates*** returns a vector of all possible five
+digit health states for a specified EQ-5D version.
+***splitHealthStates*** splits a vector of five digit health states into
+a data.frame of their individual components.
+
+``` r
+
+# Get all EQ-5D-3L five digit health states (top 6 returned for brevity).
+head(getHealthStates("3L"))
+#> [1] "11111" "11112" "11113" "11121" "11122" "11123"
+
+# Split five digit health states into their individual components.
+splitHealthStates(c("12345", "54321"), version="5L")
+#>   MO SC UA PD AD
+#> 1  1  2  3  4  5
+#> 2  5  4  3  2  1
+```
+
 ## Example data
 
 Example data is included with the package and can be accessed using the
@@ -194,15 +265,19 @@ be performed by upload of a CSV or Excel file using the packaged
 [Shiny](https://shiny.rstudio.com) app. This requires the
 [shiny](https://cran.r-project.org/package=shiny),
 [DT](https://cran.r-project.org/package=DT),
+[FSA](https://cran.r-project.org/package=FSA),
 [ggplot2](https://cran.r-project.org/package=ggplot2),
 [ggiraph](https://cran.r-project.org/package=ggiraph),
 [ggiraphExtra](https://cran.r-project.org/package=ggiraphExtra),
-[mime](https://cran.r-project.org/package=mime) and
-[readxl](https://cran.r-project.org/package=readxl) packages. The
-CSV/Excel headers should be the same as the names of the vector passed
-to the ***eq5d*** function i.e. MO, SC, UA, PD and AD or the column name
-“State” if using the five digit format. Both files below will produce
-the same results.
+[mime](https://cran.r-project.org/package=mime),
+[PMCMRplus](https://cran.r-project.org/package=PMCMRplus),
+[readxl](https://cran.r-project.org/package=readxl),
+[shinycssloaders](https://cran.r-project.org/package=shinycssloaders)
+and [shinyWidgets](https://cran.r-project.org/package=shinyWidgets)
+packages. The CSV/Excel headers should be the same as the names of the
+vector passed to the ***eq5d*** function i.e. MO, SC, UA, PD and AD or
+the column name “State” if using the five digit format. Both files below
+will produce the same results.
 
 ![Shiny EQ-5D app excel data
 formats](man/figures/shiny_app_excel_scores.png)
@@ -217,9 +292,9 @@ Alternatively, it can be accessed without installing R/Shiny/eq5d by
 visiting [shinyapps.io](https://fragla.shinyapps.io/shiny-eq5d).
 
 ![Shiny EQ-5D app main
-screenshot](man/figures/shiny_app_screenshot_main.png)
-
-![Shiny EQ-5D app density plot
+screenshot](man/figures/shiny_app_screenshot_main.png) ![Shiny EQ-5D app
+main screenshot](man/figures/shiny_app_screenshot_barplot.png) ![Shiny
+EQ-5D app density plot
 screenshot](man/figures/shiny_app_screenshot_density.png) ![Shiny EQ-5D
 app ecdf plot screenshot](man/figures/shiny_app_screenshot_ecdf.png)
 ![Shiny EQ-5D app radar plot

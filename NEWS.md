@@ -1,6 +1,22 @@
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
+# eq5d 0.7.0 (2020-04-05)
+
+  - eq5dds function added to summarise EQ-5D descriptive system.
+
+  - eq5d function rewritten to allow a vector of five digit numbers to
+    used. Thanks to @bitowaqr for the initial code.
+
+  - Added getHealthStates and splitHealthStates helper functions.
+
+  - Updated error messages.
+
+  - Shiny application updated.
+    
+      - Barplot added to display eq5dds info.
+      - Summary eq5dds table added for barplot/radar plot.
+
 # eq5d 0.6.0 (2020-02-03)
 
   - Added French EQ-5D-5L value set.

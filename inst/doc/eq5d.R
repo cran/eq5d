@@ -32,6 +32,10 @@ scores.df2 <- data.frame(state=c(11111,25532,34241,43332,52141))
 
 eq5d(scores.df2, country="Canada", version="5L", type="VT", five.digit="state")
 
+#or using a vector
+
+eq5d(scores.df2$state, country="Canada", version="5L", type="VT")
+
 
 ## ----valuesets----------------------------------------------------------------
 # Return all value sets (top 6 returned for brevity).
@@ -45,6 +49,32 @@ head(valuesets(version="5L"))
 
 # Return all UK value sets.
 valuesets(country="UK")
+
+## ----eq5dds-------------------------------------------------------------------
+
+dat <- data.frame(
+         matrix(
+           sample(1:3,5*12, replace=TRUE),12,5, 
+           dimnames=list(1:12,c("MO","SC","UA","PD","AD"))
+         ),
+         Sex=rep(c("Male", "Female"))
+       )
+
+eq5dds(dat, version="3L")
+
+eq5dds(dat, version="3L", counts=TRUE)
+
+eq5dds(dat, version="3L", by="Sex")
+
+
+## ----helper-------------------------------------------------------------------
+
+# Get all EQ-5D-3L five digit health states (top 6 returned for brevity).
+head(getHealthStates("3L"))
+
+# Split five digit health states into their individual components.
+splitHealthStates(c("12345", "54321"), version="5L")
+
 
 ## ----example data-------------------------------------------------------------
 # View example files.
