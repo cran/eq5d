@@ -1,7 +1,7 @@
 Package: eq5d
 Type: Package
 Title: Methods for Calculating 'EQ-5D' Utility Index Scores
-Version: 0.7.0
+Version: 0.7.1
 Authors@R: c(
     person("Fraser", "Morton", email = "fraser.morton@glasgow.ac.uk", role = c("aut", "cre")),
     person(c("Jagtar", "Singh"), "Nijjar", email = "jsn33@medschl.cam.ac.uk", role = "aut"))
@@ -21,7 +21,7 @@ Description: EQ-5D is a popular health related quality of life instrument used
     index scores from a subject's dimension scores. 25 TTO and 11 VAS EQ-5D-3L value 
     sets including those for countries in Szende et al (2007) 
     <doi:10.1007/1-4020-5511-0> and Szende et al (2014) 
-    <doi:10.1007/978-94-007-7596-1>, 20 EQ-5D-5L EQ-VT value sets from the EuroQol
+    <doi:10.1007/978-94-007-7596-1>, 21 EQ-5D-5L EQ-VT value sets from the EuroQol
     website, and the EQ-5D-5L crosswalk value sets developed by van Hout et al. (2012) 
     <doi:10.1016/j.jval.2012.02.008> are included. Additionally, a shiny web tool is 
     included to enable the calculation, visualisation and automated statistical 
@@ -36,13 +36,13 @@ Suggests: testthat, shiny, DT, mime, readxl, ggplot2, ggiraph,
         knitr, rmarkdown, covr
 URL: https://github.com/fragla/eq5d
 BugReports: https://github.com/fragla/eq5d/issues
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 VignetteBuilder: knitr
 Language: en-GB
 NeedsCompilation: no
-Packaged: 2020-04-06 08:35:53 UTC; fm78w
+Packaged: 2020-06-07 09:00:04 UTC; fm78w
 Author: Fraser Morton [aut, cre],
   Jagtar Singh Nijjar [aut]
 Maintainer: Fraser Morton <fraser.morton@glasgow.ac.uk>
 Repository: CRAN
-Date/Publication: 2020-04-06 09:52:09 UTC
+Date/Publication: 2020-06-07 16:10:06 UTC

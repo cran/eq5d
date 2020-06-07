@@ -13,7 +13,7 @@
 #' 
 #' @export
 eq5dcw <- function(scores, country="UK") {  
-  if(!all(names(scores) %in% c("MO", "SC", "UA", "PD", "AD"))) {
+  if(!all(.getDimensionNames() %in% names(scores))) {
     stop("Unable to identify EQ-5D dimensions in scores.")
   }
   
@@ -22,7 +22,7 @@ eq5dcw <- function(scores, country="UK") {
   
   survey <- get("CW")
   
-  if(!country %in% colnames(survey))
+  if(is.null(country) || !country %in% colnames(survey))
     stop(paste("For EQ-5D-5L crosswalk value sets country must be one of:", paste(colnames(survey), collapse=", ")))
   
   return(survey[paste(scores, collapse=""), country])
