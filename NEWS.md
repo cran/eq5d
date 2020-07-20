@@ -1,6 +1,17 @@
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
+# eq5d 0.7.2 (2020-07-20)
+
+  - Added Vietnamese EQ-5D-5L value set.
+
+  - eq5dds dimension columns can now be specified using dimensions
+    argument.
+
+  - Modal dialog box added to Shiny app for column selection.
+
+  - Bug fixed in Shiny app using EQ-5D-5L with missing data.
+
 # eq5d 0.7.1 (2020-06-06)
 
   - Added Swedish EQ-5D-5L value set.
