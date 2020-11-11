@@ -50,6 +50,60 @@ head(valuesets(version="5L"))
 # Return all UK value sets.
 valuesets(country="UK")
 
+## ----eq5dcf-------------------------------------------------------------------
+library(readxl)
+
+#load example data
+data <- read_excel(system.file("extdata", "eq5d3l_example.xlsx", package="eq5d"))
+
+#run eq5dcf function on a data.frame
+res <- eq5dcf(data, "3L")
+
+# Return data.frame of cumulative frequency stats (top 6 returned for brevity).
+head(res)
+
+
+## ----eq5dlss------------------------------------------------------------------
+lss(c(MO=1,SC=2,UA=3,PD=2,AD=1), version="3L")
+
+lss(55555, version="5L")
+
+lss(c(11111,12345, 55555), version="5L")
+
+
+## ----eq5dlfs------------------------------------------------------------------
+lfs(c(MO=1,SC=2,UA=3,PD=2,AD=1), version="3L")
+
+lfs(55555, version="5L")
+
+lfs(c(11111,12345, 55555), version="5L")
+
+
+## ----pchc---------------------------------------------------------------------
+library(readxl)
+
+#load example data
+data <- read_excel(system.file("extdata", "eq5d3l_example.xlsx", package="eq5d"))
+
+#use first 50 entries of each group as pre/post
+pre <- data[data$Group=="Group1",][1:50,]
+post <- data[data$Group=="Group2",][1:50,]
+
+#run eq5dcf function on a data.frames
+
+#Show no change, improve, worse, mixed without totals
+res1 <- pchc(pre, post, version="3L", no.problems=FALSE, totals=FALSE)
+res1
+
+#Show totals, but not those with no problems
+res2 <- pchc(pre, post, version="3L", no.problems=FALSE, totals=TRUE)
+res2
+
+#Show totals and no problems for each dimension
+res3 <- pchc(pre, post, version="3L", no.problems=TRUE, totals=TRUE, by.dimension=TRUE)
+res3
+
+
 ## ----eq5dds-------------------------------------------------------------------
 
 dat <- data.frame(
@@ -73,7 +127,7 @@ eq5dds(dat, version="3L", by="Sex")
 head(getHealthStates("3L"))
 
 # Split five digit health states into their individual components.
-splitHealthStates(c("12345", "54321"), version="5L")
+getDimensionsFromHealthStates(c("12345", "54321"), version="5L")
 
 
 ## ----example data-------------------------------------------------------------

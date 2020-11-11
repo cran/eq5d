@@ -102,6 +102,18 @@ shinyServer(function(input, output, session) {
     
   })
   
+  output$include_severity_scores <- renderUI({
+    calculations <- c("Level Sum Score" = "lss",
+                      "Level Frequency Score" = "lfs")
+    
+    checkboxGroupInput("severity_scores", "Include severity scores:", calculations)
+    
+  })
+  
+  output$include_raw_data <- renderUI({
+    checkboxInput("raw", "Include all submitted data in table", TRUE)
+  })
+  
   output$include_raw_data <- renderUI({
     checkboxInput("raw", "Include all submitted data in table", TRUE)
   })
@@ -354,7 +366,7 @@ shinyServer(function(input, output, session) {
     if(length(idx)==1) {
       length.check <- sapply(dat[[idx]], nchar)
       if(any(is.na(length.check)|length.check!=5)) {
-        if(ignoreIncomplete()) {
+        if(ignoreInvalid()) {
           dat[which(length.check!=5),idx] <- NA
         } else {
           stop("States identified without five digits.")
@@ -391,7 +403,7 @@ shinyServer(function(input, output, session) {
   }
   
   getTableData <- reactive({
-    eq5d <- eq5d(dataset(), version=input$version, type=input$type, country=input$country, ignore.incomplete=ignoreIncomplete(), dimensions=getDimensionNames())
+    eq5d <- eq5d(dataset(), version=input$version, type=input$type, country=input$country, ignore.invalid=ignoreInvalid(), dimensions=getDimensionNames())
     if(input$raw) {
       if(all(getDimensionNames() %in% colnames(rawdata()))) {
         res <- cbind(rawdata(), eq5d)
@@ -402,6 +414,15 @@ shinyServer(function(input, output, session) {
       res <- cbind(dataset(), eq5d)
     }
     colnames(res)[ncol(res)] <- "Index"
+    
+    if("lss" %in% input$severity_scores) {
+      res$LSS <- lss(dataset(), version=input$version, ignore.invalid=ignoreInvalid(), dimensions=getDimensionNames())
+    }
+    
+    if("lfs" %in% input$severity_scores) {
+      res$LFS <- lfs(dataset(), version=input$version, ignore.invalid=ignoreInvalid(), dimensions=getDimensionNames())
+    }
+    
     return(res)
   })
   
@@ -416,9 +437,9 @@ shinyServer(function(input, output, session) {
     return(data)
   })
   
-  ignoreIncomplete <- reactive({
-    ignore.incomplete <- ifelse(is.null(input$ignore_incomplete), TRUE, input$ignore_incomplete)
-    return(ignore.incomplete)
+  ignoreInvalid <- reactive({
+    ignore.invalid <- ifelse(is.null(input$ignore_invalid), TRUE, input$ignore_invalid)
+    return(ignore.invalid)
   })
 
   output$plot <- renderggiraph({
@@ -490,7 +511,11 @@ shinyServer(function(input, output, session) {
         }   
       }
   
-      if(input$plot_data != "Index") {
+      # if(input$plot_data == "LFS") {
+      #   p <- p + scale_x_continuous(labels = function(x) formatC(x, width = sub("L", "", input$version), format = "d", flag = "0"))
+      # }
+      
+      if(input$plot_data %in% c("MO", "SC", "UA", "PD", "AD")) {
         p <- p + scale_x_continuous(breaks= 1:sub("L", "", input$version), labels = 1:sub("L", "", input$version))
       }
   
@@ -589,8 +614,18 @@ shinyServer(function(input, output, session) {
   })  
   
   output$choose_plot_data <- renderUI({
+    options <- "Index"
+    
+    if("lss" %in% input$severity_scores) {
+      options <- c(options, "LSS")
+    }
+    
+    # if("lfs" %in% input$severity_scores) {
+    #   options <- c(options, "LFS")
+    # }
+    
     selectInput("plot_data", "Plot data:",
-        c("Index", "MO", "SC", "UA", "PD", "AD")
+        c(options, "MO", "SC", "UA", "PD", "AD")
     )
   })
 
@@ -605,7 +640,7 @@ shinyServer(function(input, output, session) {
       return()
     }
     data <- getTableData()
-    data <- data[!tolower(colnames(data)) %in% tolower(c(getDimensionNames(), getStateName()))]
+    data <- data[!tolower(colnames(data)) %in% tolower(c(getDimensionNames(), getStateName(), "LFS"))]
     data <- data[sapply(data, function(x) is.character(x) || is.logical(x) || is.factor(x))]
     
     groups <- "None"
@@ -783,8 +818,8 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  output$ignore_incomplete <- renderUI({
-    checkboxInput("ignore_incomplete", "Ignore data with incomplete/missing dimension scores", TRUE)
+  output$ignore_invalid <- renderUI({
+    checkboxInput("ignore_invalid", "Ignore data with invalid/incomplete/missing dimension scores", TRUE)
   })
   
   output$stats_tests <- renderTable({
@@ -860,7 +895,7 @@ shinyServer(function(input, output, session) {
     countries <- sort(unique(as.character(valuesets(version=input$version)$Country)))
     countries.list <- as.list(countries)
     countries <- gsub("_", " ", countries)
-    countries <- unlist(lapply(strsplit(gsub("([[:lower:]])([[:upper:]])", "\\1 \\2", countries), " "), function(x){paste(x, collapse=" ")}))
+    countries <- unlist(lapply(strsplit(gsub("([[:lower:]][[:lower:]])([[:upper:]])", "\\1 \\2", countries), " "), function(x){paste(x, collapse=" ")}))
     names(countries.list) <- countries
     return(countries.list)
   })
