@@ -5,7 +5,7 @@
 \alias{TTO}
 \title{EQ-5D-3L TTO value set data}
 \format{
-An object of class \code{data.frame} with 63 rows and 27 columns.
+An object of class \code{data.frame} with 63 rows and 28 columns.
 }
 \source{
 Szende, A., Oppe, M., & de Charro, F. (2007), Comparative review of Time Trade-Off value sets. 
@@ -32,6 +32,8 @@ Janssen, B., Szende, A., & Ramos-Goñi JM. (2014), Data and Methods.
 
 \strong{Portugal}: Ferreira LN, Ferreira PL, Pereira LN, Oppe M. The valuation of the EQ-5D in Portugal. Qual Life Res. 2014 Mar;23(2):413-23. doi: 10.1007/s11136-013-0448-z. Epub 2013 Jun 8. \href{https://pubmed.ncbi.nlm.nih.gov/23748906/}{PubMed}
 
+\strong{Russia}: Omelyanovskiy V, Musina N, Ratushnyak S, Bezdenezhnykh T, Fediaeva V, Roudijk B, Purba FD. Valuation of the EQ-5D-3L in Russia. Qual Life Res. 2021 Mar 13. doi: 10.1007/s11136-021-02804-6. Epub ahead of print. \href{https://pubmed.ncbi.nlm.nih.gov/33713323/}{PubMed}
+
 \strong{Singapore}: Luo N, Wang P, Thumboo J, Lim YW, Vrijhoef HJ. Valuation of EQ-5D-3L health states in Singapore: modeling of time trade-off values for 80 empirically observed health states. Pharmacoeconomics. 2014 May;32(5):495-507. doi: 10.1007/s40273-014-0142-1. \href{https://pubmed.ncbi.nlm.nih.gov/24519603/}{PubMed}
 
 \strong{Sri Lanka}: Kularatna S, Whitty JA, Johnson NW, Jayasinghe R, Scuffham PA. Valuing EQ-5D health states for Sri Lanka. Qual Life Res. 2015 Jul;24(7):1785-93. doi:10.1007/s11136-014-0906-2. Epub 2014 Dec 28. PubMed PMID: \href{https://pubmed.ncbi.nlm.nih.gov/25543271/}{PubMed}
@@ -43,14 +45,16 @@ Janssen, B., Szende, A., & Ramos-Goñi JM. (2014), Data and Methods.
 \strong{Thailand}: Tongsiri S, Cairns J. Estimating population-based values for EQ-5D health states in Thailand. Value Health. 2011 Dec;14(8):1142-5. doi: 10.1016/j.jval.2011.06.005. \href{https://pubmed.ncbi.nlm.nih.gov/22152185/}{PubMed}
 
 \strong{Trinidad and Tobago}: Bailey H, Stolk E, Kind P. Toward Explicit Prioritization for the Caribbean: An EQ-5D Value Set for Trinidad and Tobago. Value Health Reg Issues. 2016 Dec;11:60-67. doi: 10.1016/j.vhri.2016.07.010. \href{https://pubmed.ncbi.nlm.nih.gov/27986200/}{PubMed}
+
+\strong{Tunisia}: Chemli J, Drira C, Felfel H, Roudijk B, Al Sayah F, Kouki M, Kooli A, Razgallah Khrouf M. Valuing health-related quality of life using a hybrid approach: Tunisian value set for the EQ-5D-3L. Qual Life Res. 2021 Jan 14. doi: 10.1007/s11136-020-02730-z. Epub ahead of print. \href{https://pubmed.ncbi.nlm.nih.gov/33447958/}{PubMed}
 }
 \usage{
 TTO
 }
 \description{
 Coefficients for the estimation of the EQ-5D-3L index values based on TTO valuation studies
-  for Argentina, Australia, Brazil, Canada, Chile, China, Denmark, France, Germany, Italy, Japan, 
-  Netherlands, Poland, Portugal, Singapore, South Korea, Spain, Sri Lanka, Sweden, Taiwan, 
-  Thailand, Trinidad and Tobago, UK, USA and Zimbabwe.
+  for Argentina, Australia, Brazil, Canada, Chile, China, Denmark, France, Germany, Hungary, 
+  Italy, Japan, Netherlands, Poland, Portugal, Russia, Singapore, South Korea, Spain, 
+  Sri Lanka, Sweden, Taiwan, Thailand, Trinidad and Tobago, Tunisia, UK, USA and Zimbabwe.
 }
 \keyword{datasets}

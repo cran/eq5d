@@ -18,6 +18,9 @@ eq5d(scores=scores, country="UK", version="3L", type="TTO")
 #Using five digit format
 eq5d(scores=12321, country="UK", version="3L", type="TTO")
 
+#EQ-5D-Y using the Slovenian cTTO value set
+eq5d(scores=13321, country="Slovenia", version="Y", type="cTTO")
+
 #multiple calculations using the Canadian VT value set
 
 #data.frame with individual dimensions
@@ -89,7 +92,7 @@ data <- read_excel(system.file("extdata", "eq5d3l_example.xlsx", package="eq5d")
 pre <- data[data$Group=="Group1",][1:50,]
 post <- data[data$Group=="Group2",][1:50,]
 
-#run eq5dcf function on a data.frames
+#run pchc function on data.frames
 
 #Show no change, improve, worse, mixed without totals
 res1 <- pchc(pre, post, version="3L", no.problems=FALSE, totals=FALSE)
