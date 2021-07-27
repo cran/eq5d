@@ -1,6 +1,20 @@
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
+# eq5d 0.10.0 (2021-07-27)
+
+  - Belgian and Mexican EQ-5D-5L value sets added.
+
+  - EQ-5D-3L reverse crosswalk value sets added for England, Germany,
+    Netherlands and USA.
+
+  - Ecuadorian EQ-5D-3L value set added.
+
+  - Egyptian EQ-5D-5L removed due to article being retracted - see
+    [PubMed](https://pubmed.ncbi.nlm.nih.gov/34129227/).
+
+  - Clearer messaging about ‘ignore.invalid’ parameter error message.
+
 # eq5d 0.9.0 (2021-04-12)
 
   - Slovenian and Japanese EQ-5D-Y value sets now available.

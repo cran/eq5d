@@ -1,5 +1,15 @@
 context("EQ-5D-5L")
 
+test_that("EQ-5D-5L Belgium gives correct answer", {
+  expect_equal(eq5d5l(c(MO=1,SC=1,UA=1,PD=1,AD=1), "Belgium"), 1)
+  expect_equal(eq5d5l(c(MO=2,SC=2,UA=2,PD=2,AD=2), "Belgium"), 0.755)
+  expect_equal(eq5d5l(c(MO=3,SC=3,UA=3,PD=3,AD=3), "Belgium"), 0.577)
+  expect_equal(eq5d5l(c(MO=4,SC=4,UA=4,PD=4,AD=4), "Belgium"), -0.215)
+  expect_equal(eq5d5l(c(MO=1,SC=5,UA=3,PD=4,AD=2), "Belgium"), 0.309)
+  expect_equal(eq5d5l(c(MO=5,SC=4,UA=3,PD=2,AD=1), "Belgium"), 0.491)
+  expect_equal(eq5d5l(c(MO=5,SC=5,UA=5,PD=5,AD=5), "Belgium"),-0.532)
+})
+
 test_that("EQ-5D-5L Canada gives correct answer", {
   expect_equal(eq5d5l(c(MO=2,SC=3,UA=1,PD=4,AD=5), "Canada"), 0.275)
   expect_equal(eq5d5l(c(MO=1,SC=1,UA=1,PD=1,AD=1), "Canada"), 0.949)
@@ -17,13 +27,6 @@ test_that("EQ-5D-5L Denmark gives correct answer", {
   expect_equal(eq5d5l(c(MO=1,SC=1,UA=1,PD=1,AD=1), "Denmark"), 1)
   expect_equal(eq5d5l(c(MO=1,SC=3,UA=2,PD=2,AD=4), "Denmark"), 0.439)
   expect_equal(eq5d5l(c(MO=5,SC=5,UA=5,PD=5,AD=5), "Denmark"), -0.758)
-})
-
-test_that("EQ-5D-5L Egypt gives correct answer", {
-  expect_equal(eq5d5l(c(MO=1,SC=1,UA=1,PD=1,AD=1), "Egypt"), 1)
-  expect_equal(eq5d5l(c(MO=1,SC=1,UA=2,PD=1,AD=1), "Egypt"), 0.953)
-  expect_equal(eq5d5l(c(MO=1,SC=1,UA=1,PD=2,AD=1), "Egypt"), 0.953)
-  expect_equal(round(eq5d5l(c(MO=5,SC=5,UA=5,PD=5,AD=5), "Egypt"),2), -0.93)
 })
 
 test_that("EQ-5D-5L England gives correct answer", {
@@ -121,6 +124,13 @@ test_that("EQ-5D-5L South Korea gives correct answer", {
   expect_equal(eq5d5l(c(MO=1,SC=2,UA=3,PD=4,AD=5), "SouthKorea"), 0.440)
   expect_equal(eq5d5l(c(MO=1,SC=1,UA=2,PD=1,AD=1), "SouthKorea"), 0.883)
   expect_equal(eq5d5l(c(MO=5,SC=5,UA=5,PD=5,AD=5), "SouthKorea"), -0.066)
+})
+
+test_that("EQ-5D-5L Mexico gives correct answer", {
+  expect_equal(eq5d5l(c(MO=1,SC=1,UA=1,PD=1,AD=1), "Mexico"), 1)
+  expect_equal(eq5d5l(c(MO=2,SC=1,UA=1,PD=1,AD=1), "Mexico"), 0.984)
+  expect_equal(eq5d5l(c(MO=1,SC=2,UA=3,PD=4,AD=5), "Mexico"), 0.295)
+  expect_equal(eq5d5l(c(MO=5,SC=5,UA=5,PD=5,AD=5), "Mexico"), -0.596)
 })
 
 test_that("EQ-5D-5L Malaysia gives correct answer", {

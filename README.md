@@ -49,7 +49,11 @@ scores stored in CSV or Excel files.
 Value sets for EQ-5D-3L are available for many countries and have been
 produced using the time trade-off (TTO) valuation technique or the
 visual analogue scale (VAS) valuation technique. Some countries have TTO
-and VAS value sets for EQ-5D-3L.
+and VAS value sets for EQ-5D-3L. Additionally, EQ-5D-3L “reverse
+crosswalk” value sets published on the
+[EuroQol](https://euroqol.org/support/tools/analysis-tools/cross-walk-reverse-cross-walk/)
+website that enable EQ-5D-3L data to be mapped to EQ-5D-5L value sets
+are included.
 
 For EQ-5D-5L, a standardised valuation study protocol (EQ-VT) was
 developed by the EuroQol group based on the composite time trade-off
@@ -65,9 +69,9 @@ mapping between the EQ-5D-5L and EQ-5D-3L descriptive systems.
 
 Additional information on EQ-5D can be found on the
 [EuroQol](https://euroqol.org/) website as well as in [Szende *et al*
-(2007)](https://www.doi.org/10.1007/1-4020-5511-0) and [Szende *et al*
-(2014)](https://www.doi.org/10.1007/978-94-007-7596-1). Advice on
-[choosing a value
+(2007)](https://doi.org/10.1007/1-4020-5511-0) and [Szende *et al*
+(2014)](https://doi.org/10.1007/978-94-007-7596-1). Advice on [choosing
+a value
 set](https://euroqol.org/eq-5d-instruments/eq-5d-3l-about/valuation/choosing-a-value-set/)
 can also be found on the EuroQol website.
 
@@ -108,6 +112,14 @@ eq5d(scores=12321, country="UK", version="3L", type="TTO")
 #EQ-5D-Y using the Slovenian cTTO value set
 eq5d(scores=13321, country="Slovenia", version="Y", type="cTTO")
 #> [1] 0.295
+
+#EQ-5D-5L crosswalk
+eq5d(scores=55555, country="Spain", version="5L", type="CW")
+#> [1] -0.654
+
+#EQ-5D-3L reverse crosswalk
+eq5d(scores=33333, country="Germany", version="3L", type="RCW")
+#> [1] -0.329
 
 #multiple calculations using the Canadian VT value set
 
@@ -161,10 +173,10 @@ head(valuesets(type="VAS"))
 # Return EQ-5D-5L value sets (top 6 returned for brevity).
 head(valuesets(version="5L"))
 #>    Version Type  Country
-#> 1 EQ-5D-5L   VT   Canada
-#> 2 EQ-5D-5L   VT    China
-#> 3 EQ-5D-5L   VT  Denmark
-#> 4 EQ-5D-5L   VT    Egypt
+#> 1 EQ-5D-5L   VT  Belgium
+#> 2 EQ-5D-5L   VT   Canada
+#> 3 EQ-5D-5L   VT    China
+#> 4 EQ-5D-5L   VT  Denmark
 #> 5 EQ-5D-5L   VT  England
 #> 6 EQ-5D-5L   VT Ethiopia
 
@@ -358,29 +370,29 @@ dat <- data.frame(
        )
 
 eq5dds(dat, version="3L")
-#>     MO   SC UA PD   AD
-#> 1 33.3 25.0 25 25 16.7
-#> 2 33.3 58.3 50 50 41.7
-#> 3 33.3 16.7 25 25 41.7
+#>     MO   SC   UA   PD   AD
+#> 1 58.3 33.3 33.3 33.3 16.7
+#> 2 16.7 25.0 50.0 50.0 50.0
+#> 3 25.0 41.7 16.7 16.7 33.3
 
 eq5dds(dat, version="3L", counts=TRUE)
 #>   MO SC UA PD AD
-#> 1  4  3  3  3  2
-#> 2  4  7  6  6  5
-#> 3  4  2  3  3  5
+#> 1  7  4  4  4  2
+#> 2  2  3  6  6  6
+#> 3  3  5  2  2  4
 
 eq5dds(dat, version="3L", by="Sex")
 #> data[, by]: Female
 #>     MO   SC   UA   PD   AD
-#> 1 33.3 33.3 33.3 33.3 16.7
-#> 2 33.3 66.7 33.3 50.0 50.0
-#> 3 33.3  0.0 33.3 16.7 33.3
+#> 1 66.7 33.3 33.3 33.3 33.3
+#> 2 16.7 16.7 66.7 50.0 50.0
+#> 3 16.7 50.0  0.0 16.7 16.7
 #> ------------------------------------------------------------ 
 #> data[, by]: Male
-#>     MO   SC   UA   PD   AD
-#> 1 33.3 16.7 16.7 16.7 16.7
-#> 2 33.3 50.0 66.7 50.0 33.3
-#> 3 33.3 33.3 16.7 33.3 50.0
+#>     MO   SC   UA   PD AD
+#> 1 50.0 33.3 33.3 33.3  0
+#> 2 16.7 33.3 33.3 50.0 50
+#> 3 33.3 33.3 33.3 16.7 50
 ```
 
 ## Helper functions

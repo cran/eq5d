@@ -18,6 +18,17 @@
 #'   
 "CW"
 
+#' EQ-5D-3L Reverse Crosswalk data
+#'
+#' Reverse Crosswalk index value table to calculate EQ-5D-5L indices from EQ-5D-3L data
+#'   for England, Germany, Netherlands and USA. Table uses the values of van Hout et al
+#'   from the EuroQol website.
+#'      
+#' @source
+#' \href{https://euroqol.org/support/tools/analysis-tools/cross-walk-reverse-cross-walk/}{Reverse crosswalk datasets}
+#'   
+"RCW"
+
 #' EQ-5D-3L TTO value set data
 #'
 #' Coefficients for the estimation of the EQ-5D-3L index values based on TTO valuation studies
@@ -43,6 +54,8 @@
 #' \strong{Chile}: Zarate V, Kind P, Valenzuela P, Vignau A, Olivares-Tirado P, Munoz A. Social valuation of EQ-5D health states: the Chilean case. Value in Health. 2011 Dec;14(8):1135-41. \href{https://pubmed.ncbi.nlm.nih.gov/22152184/}{PubMed}
 #' 
 #' \strong{China}: Liu GG, Wu H, Li M, Gao C, Luo N. Chinese time trade-off values for EQ-5D health states. Value Health. 2014 Jul;17(5):597-604. doi: 10.1016/j.jval.2014.05.007. Epub 2014 Jul 23. \href{https://pubmed.ncbi.nlm.nih.gov/25128053/}{PubMed}
+#'
+#' \strong{Ecuador}: Lucio R, Flores V,  Granja M, Mata G. Resultados de la encuesta de valoración social de los estados de salud de lAños de vida ajustados por calidad (QALY'S). 2019. \href{https://www.researchgate.net/publication/335840590_QALYs_FINAL_Ecuadordig}{Link}
 #'
 #' \strong{Hungary}: Rencz F, Brodszky V, Gulácsi L, Golicki D, Ruzsa G, Pickard AS, Law EH, Péntek M. Parallel Valuation of the EQ-5D-3L and EQ-5D-5L by Time Trade-Off in Hungary. Value Health. 2020 Sep;23(9):1235-1245. doi: 10.1016/j.jval.2020.03.019. Epub 2020 Aug 12. \href{https://pubmed.ncbi.nlm.nih.gov/32940242/}{PubMed}
 #'   
@@ -93,10 +106,10 @@
 #'
 #' @source 
 #'   \enumerate{
+#'     \item{\strong{Belgium}: Bouckaert N, Gerkens S, Devriese S, Cleemput I. An EQ-5D-5L value set for Belgium – How to value health- related quality of life? Health Services Research (HSR) Brussels: Belgian Health Care Knowledge Centre (KCE). 2021. KCE Reports 342. D/2021/10.273/19. \href{https://www.kce.fgov.be/sites/default/files/atoms/files/KCE_342_EQ-5D-5L_value_set_for_Belgium_Report_1.pdf}{PDF}}
 #'     \item{\strong{Canada}: Xie F, Pullenayegum E, Gaebel K, Bansback N, Bryan S, Ohinmaa A, Poissant L, Johnson JA. A Time Trade-off-derived Value Set of the EQ-5D-5L for Canada. Med Care. 2016;54(1):98-105. \href{https://pubmed.ncbi.nlm.nih.gov/26492214/}{PubMed}}
 #'     \item{\strong{China}: Luo N, Liu G, Li M, Guan H, Jin X, Rand-Hendriksen K. Estimating an EQ-5D-5L Value Set for China. Value in Health. 2017 Apr;20(4):662-669. doi: 10.1016/j.jval.2016.11.016. Epub 2017 Feb 9. \href{https://pubmed.ncbi.nlm.nih.gov/28408009/}{PubMed}}
 #'     \item{\strong{Denmark)}: Jensen CE, Sørensen SS, Gudex C, Jensen MB, Pedersen KM, Ehlers LH. The Danish EQ-5D-5L Value Set: A Hybrid Model Using cTTO and DCE Data. Appl Health Econ Health Policy. 2021 Feb 2. doi: 10.1007/s40258-021-00639-3. Epub ahead of print. \href{https://pubmed.ncbi.nlm.nih.gov/33527304/}{PubMed}}
-#'     \item{\strong{Egypt}: Al Shabasy SA, Abbassi MM, Finch AP, Baines D, Farid SF. The EQ-5D-5L Valuation Study in Egypt. Pharmacoeconomics. 2021 Mar 12:1–13. doi: 10.1007/s40273-021-01002-z. Epub ahead of print. \href{https://pubmed.ncbi.nlm.nih.gov/33709283/}{PubMed}}
 #'     \item{\strong{England}: Devlin N, Shah K, Feng Y, Mulhern B, van Hout B. Valuing health-related quality of Life: An EQ-5D-5L Value Set for England. Health Economics. 2018 Jan;27(1):1-22 \href{https://pubmed.ncbi.nlm.nih.gov/28833869/}{PubMed}}
 #'     \item{\strong{Ethiopia}: Welie AG, Gebretekle GB, Stolk E, Mukuria C, Krahn MD, Enquoselassie F, Fenta TG. Valuing Health State: An EQ-5D-5L Value Set for Ethiopians. Value Health Reg Issues. 2019 Nov 1;22:7-14. doi: 10.1016/j.vhri.2019.08.475. \href{https://pubmed.ncbi.nlm.nih.gov/31683254/}{PubMed}}
 #'     \item{\strong{France}: Andrade LF, Ludwig K, Goni JMR, Oppe M, de Pouvourville G. A French Value Set for the EQ-5D-5L. Pharmacoeconomics. 2020 Jan 8. doi: 10.1007/s40273-019-00876-4. \href{https://pubmed.ncbi.nlm.nih.gov/31912325/}{PubMed}}
