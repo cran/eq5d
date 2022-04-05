@@ -27,6 +27,17 @@ eq5d(scores=55555, country="Spain", version="5L", type="CW")
 #EQ-5D-3L reverse crosswalk
 eq5d(scores=33333, country="Germany", version="3L", type="RCW")
 
+#EQ-5D-5L to EQ-5D-3L NICE DSU mapping
+
+#Using dimensions
+eq5d(c(MO=1,SC=2,UA=3,PD=4,AD=5), version="5L", type="DSU", country="UK", age=23, sex="male")
+
+#Using exact utility score
+eq5d(0.922, country="UK", version="5L", type="DSU", age=18, sex="male")
+
+#Using approximate utility score
+eq5d(0.435, country="UK", version="5L", type="DSU", age=30, sex="female", bwidth=0.0001)
+
 #multiple calculations using the Canadian VT value set
 
 #data.frame with individual dimensions
@@ -58,6 +69,10 @@ head(valuesets(version="5L"))
 
 # Return all UK value sets.
 valuesets(country="UK")
+
+# Return all EQ-5D-5L to EQ-5D-3L DSU value sets.
+valuesets(type="DSU", version="5L")
+
 
 ## ----eq5dcf-------------------------------------------------------------------
 library(readxl)

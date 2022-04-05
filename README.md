@@ -51,9 +51,8 @@ produced using the time trade-off (TTO) valuation technique or the
 visual analogue scale (VAS) valuation technique. Some countries have TTO
 and VAS value sets for EQ-5D-3L. Additionally, EQ-5D-3L “reverse
 crosswalk” value sets published on the
-[EuroQol](https://euroqol.org/support/tools/analysis-tools/cross-walk-reverse-cross-walk/)
-website that enable EQ-5D-3L data to be mapped to EQ-5D-5L value sets
-are included.
+[EuroQol](https://euroqol.org/support/analysis-tools/) website that
+enable EQ-5D-3L data to be mapped to EQ-5D-5L value sets are included.
 
 For EQ-5D-5L, a standardised valuation study protocol (EQ-VT) was
 developed by the EuroQol group based on the composite time trade-off
@@ -66,6 +65,13 @@ al*](https://pubmed.ncbi.nlm.nih.gov/22867780/) as well as that for
 Russia are also included. The crosswalk value sets enable index values
 to be calculated for EQ-5D-5L data where no value set is available by
 mapping between the EQ-5D-5L and EQ-5D-3L descriptive systems.
+
+The recently published age and sex conditional based mapping data by the
+[NICE Decision Support
+Unit](https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l)
+are also now part of the package. These enable age-sex based EQ-5D-3L to
+EQ-5D-5L and EQ-5D-5L to EQ-5D-3L mappings from dimensions and exact or
+approximate utility index scores.
 
 Additional information on EQ-5D can be found on the
 [EuroQol](https://euroqol.org/) website as well as in [Szende *et al*
@@ -121,6 +127,20 @@ eq5d(scores=55555, country="Spain", version="5L", type="CW")
 eq5d(scores=33333, country="Germany", version="3L", type="RCW")
 #> [1] -0.329
 
+#EQ-5D-5L to EQ-5D-3L NICE DSU mapping
+
+#Using dimensions
+eq5d(c(MO=1,SC=2,UA=3,PD=4,AD=5), version="5L", type="DSU", country="UK", age=23, sex="male")
+#> [1] 0.083
+
+#Using exact utility score
+eq5d(0.922, country="UK", version="5L", type="DSU", age=18, sex="male")
+#> [1] 0.893
+
+#Using approximate utility score
+eq5d(0.435, country="UK", version="5L", type="DSU", age=30, sex="female", bwidth=0.0001)
+#> [1] 0.302
+
 #multiple calculations using the Canadian VT value set
 
 #data.frame with individual dimensions
@@ -172,13 +192,13 @@ head(valuesets(type="VAS"))
 
 # Return EQ-5D-5L value sets (top 6 returned for brevity).
 head(valuesets(version="5L"))
-#>    Version Type  Country
-#> 1 EQ-5D-5L   VT  Belgium
-#> 2 EQ-5D-5L   VT   Canada
-#> 3 EQ-5D-5L   VT    China
-#> 4 EQ-5D-5L   VT  Denmark
-#> 5 EQ-5D-5L   VT  England
-#> 6 EQ-5D-5L   VT Ethiopia
+#>    Version Type Country
+#> 1 EQ-5D-5L   VT Belgium
+#> 2 EQ-5D-5L   VT  Canada
+#> 3 EQ-5D-5L   VT   China
+#> 4 EQ-5D-5L   VT Denmark
+#> 5 EQ-5D-5L   VT   Egypt
+#> 6 EQ-5D-5L   VT England
 
 # Return all UK value sets.
 valuesets(country="UK")
@@ -186,6 +206,19 @@ valuesets(country="UK")
 #> 1 EQ-5D-3L  TTO      UK
 #> 2 EQ-5D-3L  VAS      UK
 #> 3 EQ-5D-5L   CW      UK
+#> 4 EQ-5D-3L  DSU      UK
+#> 5 EQ-5D-5L  DSU      UK
+
+# Return all EQ-5D-5L to EQ-5D-3L DSU value sets.
+valuesets(type="DSU", version="5L")
+#>    Version Type     Country
+#> 1 EQ-5D-5L  DSU       China
+#> 2 EQ-5D-5L  DSU     Germany
+#> 3 EQ-5D-5L  DSU       Japan
+#> 4 EQ-5D-5L  DSU Netherlands
+#> 5 EQ-5D-5L  DSU  SouthKorea
+#> 6 EQ-5D-5L  DSU       Spain
+#> 7 EQ-5D-5L  DSU          UK
 ```
 
 ## Analysis of EQ-5D Profiles
@@ -193,9 +226,9 @@ valuesets(country="UK")
 A number of methods have been published that enable the analysis of
 EQ-5D profiles, most recently in the open access book Methods for
 Analysing and Reporting EQ-5D Data by [Devlin, Janssen and
-Parkin](https://www.springer.com/gp/book/9783030476212). The eq5d
-package includes R implentations of some of the methods from this book
-and from other sources that may be of use in analysing EQ-5D data.
+Parkin](https://link.springer.com/book/10.1007/978-3-030-47622-9). The
+eq5d package includes R implentations of some of the methods from this
+book and from other sources that may be of use in analysing EQ-5D data.
 
 ### Cumulative frequency analysis
 
@@ -370,29 +403,29 @@ dat <- data.frame(
        )
 
 eq5dds(dat, version="3L")
-#>     MO   SC   UA   PD   AD
-#> 1 33.3 33.3 33.3 33.3 50.0
-#> 2 16.7 41.7  8.3  0.0  8.3
-#> 3 50.0 25.0 58.3 66.7 41.7
+#>     MO SC   UA   PD   AD
+#> 1 33.3 25 16.7 25.0 58.3
+#> 2 50.0 50 50.0 16.7 25.0
+#> 3 16.7 25 33.3 58.3 16.7
 
 eq5dds(dat, version="3L", counts=TRUE)
 #>   MO SC UA PD AD
-#> 1  4  4  4  4  6
-#> 2  2  5  1  0  1
-#> 3  6  3  7  8  5
+#> 1  4  3  2  3  7
+#> 2  6  6  6  2  3
+#> 3  2  3  4  7  2
 
 eq5dds(dat, version="3L", by="Sex")
 #> data[, by]: Female
-#>     MO   SC   UA PD   AD
-#> 1 16.7 33.3 16.7 50 66.7
-#> 2 16.7 33.3  0.0  0  0.0
-#> 3 66.7 33.3 83.3 50 33.3
+#>     MO   SC   UA   PD  AD
+#> 1  0.0 33.3 33.3 16.7 100
+#> 2 66.7 50.0 16.7 16.7   0
+#> 3 33.3 16.7 50.0 66.7   0
 #> ------------------------------------------------------------ 
 #> data[, by]: Male
 #>     MO   SC   UA   PD   AD
-#> 1 50.0 33.3 50.0 16.7 33.3
-#> 2 16.7 50.0 16.7  0.0 16.7
-#> 3 33.3 16.7 33.3 83.3 50.0
+#> 1 66.7 16.7  0.0 33.3 16.7
+#> 2 33.3 50.0 83.3 16.7 50.0
+#> 3  0.0 33.3 16.7 50.0 33.3
 ```
 
 ## Helper functions

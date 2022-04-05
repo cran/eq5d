@@ -12,7 +12,7 @@
 
 <meta name="author" content="Fraser Morton and Jagtar Singh Nijjar" />
 
-<meta name="date" content="2021-11-12" />
+<meta name="date" content="2022-04-05" />
 
 <title>Calculating EQ-5D indices and summarising profiles with eq5d</title>
 
@@ -318,7 +318,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Calculating EQ-5D indices and summarising profiles with eq5d</h1>
 <h4 class="author">Fraser Morton and Jagtar Singh Nijjar</h4>
-<h4 class="date">12 November 2021</h4>
+<h4 class="date">05 April 2022</h4>
 
 
 
@@ -329,9 +329,10 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>The evaluation component requires a patient to record their overall health status using a visual analogue scale (EQ-VAS).</p>
 <p>Following assessment the scores from the descriptive component can be reported as a five digit number ranging from 11111 (full health) to 33333/55555 (worst health). A number of methods exist for analysing these five digit profiles. However, frequently they are converted to a single utility index using country specific value sets, which can be used in the clinical and economic evaluation of health care as well as in population health surveys.</p>
 <p>The eq5d package provides methods for the cross-sectional and longitudinal analysis of EQ-5D profiles and also the calculation of utility index scores from a subject’s dimension scores. Additionally, a <a href="https://shiny.rstudio.com">Shiny</a> app is included to enable the calculation, visualisation and automated statistical analysis of multiple EQ-5D index values via a web browser using EQ-5D dimension scores stored in CSV or Excel files.</p>
-<p>Value sets for EQ-5D-3L are available for many countries and have been produced using the time trade-off (TTO) valuation technique or the visual analogue scale (VAS) valuation technique. Some countries have TTO and VAS value sets for EQ-5D-3L. Additionally, EQ-5D-3L “reverse crosswalk” value sets published on the <a href="https://euroqol.org/support/tools/analysis-tools/cross-walk-reverse-cross-walk/">EuroQol</a> website that enable EQ-5D-3L data to be mapped to EQ-5D-5L value sets are included.</p>
+<p>Value sets for EQ-5D-3L are available for many countries and have been produced using the time trade-off (TTO) valuation technique or the visual analogue scale (VAS) valuation technique. Some countries have TTO and VAS value sets for EQ-5D-3L. Additionally, EQ-5D-3L “reverse crosswalk” value sets published on the <a href="https://euroqol.org/support/analysis-tools/">EuroQol</a> website that enable EQ-5D-3L data to be mapped to EQ-5D-5L value sets are included.</p>
 <p>For EQ-5D-5L, a standardised valuation study protocol (EQ-VT) was developed by the EuroQol group based on the composite time trade-off (cTTO) valuation technique supplemented by a discrete choice experiment (DCE). The EuroQol group recommends users to use a standard value set where available.</p>
 <p>The EQ-5D-5L “crosswalk” value sets published by <a href="https://pubmed.ncbi.nlm.nih.gov/22867780/">van Hout <em>et al</em></a> as well as that for Russia are also included. The crosswalk value sets enable index values to be calculated for EQ-5D-5L data where no value set is available by mapping between the EQ-5D-5L and EQ-5D-3L descriptive systems.</p>
+<p>The recently published age and sex conditional based mapping data by the <a href="https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l">NICE Decision Support Unit</a> are also now part of the package. These enable age-sex based EQ-5D-3L to EQ-5D-5L and EQ-5D-5L to EQ-5D-3L mappings from dimensions and exact or approximate utility index scores.</p>
 <p>Additional information on EQ-5D can be found on the <a href="https://euroqol.org/">EuroQol</a> website as well as in <a href="https://doi.org/10.1007/1-4020-5511-0">Szende <em>et al</em> (2007)</a> and <a href="https://doi.org/10.1007/978-94-007-7596-1">Szende <em>et al</em> (2014)</a>. Advice on <a href="https://euroqol.org/eq-5d-instruments/eq-5d-3l-about/valuation/choosing-a-value-set/">choosing a value set</a> can also be found on the EuroQol website.</p>
 <div id="installation" class="section level2">
 <h2>Installation</h2>
@@ -370,26 +371,40 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb3-25" data-line-number="25"><span class="kw">eq5d</span>(<span class="dt">scores=</span><span class="dv">33333</span>, <span class="dt">country=</span><span class="st">&quot;Germany&quot;</span>, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;RCW&quot;</span>)</a>
 <a class="sourceLine" id="cb3-26" data-line-number="26"><span class="co">#&gt; [1] -0.329</span></a>
 <a class="sourceLine" id="cb3-27" data-line-number="27"></a>
-<a class="sourceLine" id="cb3-28" data-line-number="28"><span class="co">#multiple calculations using the Canadian VT value set</span></a>
+<a class="sourceLine" id="cb3-28" data-line-number="28"><span class="co">#EQ-5D-5L to EQ-5D-3L NICE DSU mapping</span></a>
 <a class="sourceLine" id="cb3-29" data-line-number="29"></a>
-<a class="sourceLine" id="cb3-30" data-line-number="30"><span class="co">#data.frame with individual dimensions</span></a>
-<a class="sourceLine" id="cb3-31" data-line-number="31">scores.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
-<a class="sourceLine" id="cb3-32" data-line-number="32">  <span class="dt">MO=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>), <span class="dt">SC=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>), <span class="dt">UA=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>), <span class="dt">PD=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">4</span>), <span class="dt">AD=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb3-33" data-line-number="33">)</a>
-<a class="sourceLine" id="cb3-34" data-line-number="34"></a>
-<a class="sourceLine" id="cb3-35" data-line-number="35"><span class="kw">eq5d</span>(scores.df, <span class="dt">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;VT&quot;</span>)</a>
-<a class="sourceLine" id="cb3-36" data-line-number="36"><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></a>
+<a class="sourceLine" id="cb3-30" data-line-number="30"><span class="co">#Using dimensions</span></a>
+<a class="sourceLine" id="cb3-31" data-line-number="31"><span class="kw">eq5d</span>(<span class="kw">c</span>(<span class="dt">MO=</span><span class="dv">1</span>,<span class="dt">SC=</span><span class="dv">2</span>,<span class="dt">UA=</span><span class="dv">3</span>,<span class="dt">PD=</span><span class="dv">4</span>,<span class="dt">AD=</span><span class="dv">5</span>), <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="dt">country=</span><span class="st">&quot;UK&quot;</span>, <span class="dt">age=</span><span class="dv">23</span>, <span class="dt">sex=</span><span class="st">&quot;male&quot;</span>)</a>
+<a class="sourceLine" id="cb3-32" data-line-number="32"><span class="co">#&gt; [1] 0.083</span></a>
+<a class="sourceLine" id="cb3-33" data-line-number="33"></a>
+<a class="sourceLine" id="cb3-34" data-line-number="34"><span class="co">#Using exact utility score</span></a>
+<a class="sourceLine" id="cb3-35" data-line-number="35"><span class="kw">eq5d</span>(<span class="fl">0.922</span>, <span class="dt">country=</span><span class="st">&quot;UK&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="dt">age=</span><span class="dv">18</span>, <span class="dt">sex=</span><span class="st">&quot;male&quot;</span>)</a>
+<a class="sourceLine" id="cb3-36" data-line-number="36"><span class="co">#&gt; [1] 0.893</span></a>
 <a class="sourceLine" id="cb3-37" data-line-number="37"></a>
-<a class="sourceLine" id="cb3-38" data-line-number="38"><span class="co">#data.frame using five digit format</span></a>
-<a class="sourceLine" id="cb3-39" data-line-number="39">scores.df2 &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">state=</span><span class="kw">c</span>(<span class="dv">11111</span>,<span class="dv">25532</span>,<span class="dv">34241</span>,<span class="dv">43332</span>,<span class="dv">52141</span>))</a>
-<a class="sourceLine" id="cb3-40" data-line-number="40"></a>
-<a class="sourceLine" id="cb3-41" data-line-number="41"><span class="kw">eq5d</span>(scores.df2, <span class="dt">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;VT&quot;</span>, <span class="dt">five.digit=</span><span class="st">&quot;state&quot;</span>)</a>
-<a class="sourceLine" id="cb3-42" data-line-number="42"><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></a>
+<a class="sourceLine" id="cb3-38" data-line-number="38"><span class="co">#Using approximate utility score</span></a>
+<a class="sourceLine" id="cb3-39" data-line-number="39"><span class="kw">eq5d</span>(<span class="fl">0.435</span>, <span class="dt">country=</span><span class="st">&quot;UK&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="dt">age=</span><span class="dv">30</span>, <span class="dt">sex=</span><span class="st">&quot;female&quot;</span>, <span class="dt">bwidth=</span><span class="fl">0.0001</span>)</a>
+<a class="sourceLine" id="cb3-40" data-line-number="40"><span class="co">#&gt; [1] 0.302</span></a>
+<a class="sourceLine" id="cb3-41" data-line-number="41"></a>
+<a class="sourceLine" id="cb3-42" data-line-number="42"><span class="co">#multiple calculations using the Canadian VT value set</span></a>
 <a class="sourceLine" id="cb3-43" data-line-number="43"></a>
-<a class="sourceLine" id="cb3-44" data-line-number="44"><span class="co">#or using a vector</span></a>
-<a class="sourceLine" id="cb3-45" data-line-number="45"></a>
-<a class="sourceLine" id="cb3-46" data-line-number="46"><span class="kw">eq5d</span>(scores.df2<span class="op">$</span>state, <span class="dt">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;VT&quot;</span>)</a>
-<a class="sourceLine" id="cb3-47" data-line-number="47"><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></a></code></pre></div>
+<a class="sourceLine" id="cb3-44" data-line-number="44"><span class="co">#data.frame with individual dimensions</span></a>
+<a class="sourceLine" id="cb3-45" data-line-number="45">scores.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
+<a class="sourceLine" id="cb3-46" data-line-number="46">  <span class="dt">MO=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>), <span class="dt">SC=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>), <span class="dt">UA=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>), <span class="dt">PD=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">4</span>), <span class="dt">AD=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb3-47" data-line-number="47">)</a>
+<a class="sourceLine" id="cb3-48" data-line-number="48"></a>
+<a class="sourceLine" id="cb3-49" data-line-number="49"><span class="kw">eq5d</span>(scores.df, <span class="dt">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;VT&quot;</span>)</a>
+<a class="sourceLine" id="cb3-50" data-line-number="50"><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></a>
+<a class="sourceLine" id="cb3-51" data-line-number="51"></a>
+<a class="sourceLine" id="cb3-52" data-line-number="52"><span class="co">#data.frame using five digit format</span></a>
+<a class="sourceLine" id="cb3-53" data-line-number="53">scores.df2 &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">state=</span><span class="kw">c</span>(<span class="dv">11111</span>,<span class="dv">25532</span>,<span class="dv">34241</span>,<span class="dv">43332</span>,<span class="dv">52141</span>))</a>
+<a class="sourceLine" id="cb3-54" data-line-number="54"></a>
+<a class="sourceLine" id="cb3-55" data-line-number="55"><span class="kw">eq5d</span>(scores.df2, <span class="dt">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;VT&quot;</span>, <span class="dt">five.digit=</span><span class="st">&quot;state&quot;</span>)</a>
+<a class="sourceLine" id="cb3-56" data-line-number="56"><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></a>
+<a class="sourceLine" id="cb3-57" data-line-number="57"></a>
+<a class="sourceLine" id="cb3-58" data-line-number="58"><span class="co">#or using a vector</span></a>
+<a class="sourceLine" id="cb3-59" data-line-number="59"></a>
+<a class="sourceLine" id="cb3-60" data-line-number="60"><span class="kw">eq5d</span>(scores.df2<span class="op">$</span>state, <span class="dt">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;VT&quot;</span>)</a>
+<a class="sourceLine" id="cb3-61" data-line-number="61"><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></a></code></pre></div>
 </div>
 <div id="value-sets" class="section level2">
 <h2>Value sets</h2>
@@ -416,24 +431,37 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb4-20" data-line-number="20"></a>
 <a class="sourceLine" id="cb4-21" data-line-number="21"><span class="co"># Return EQ-5D-5L value sets (top 6 returned for brevity).</span></a>
 <a class="sourceLine" id="cb4-22" data-line-number="22"><span class="kw">head</span>(<span class="kw">valuesets</span>(<span class="dt">version=</span><span class="st">&quot;5L&quot;</span>))</a>
-<a class="sourceLine" id="cb4-23" data-line-number="23"><span class="co">#&gt;    Version Type  Country</span></a>
-<a class="sourceLine" id="cb4-24" data-line-number="24"><span class="co">#&gt; 1 EQ-5D-5L   VT  Belgium</span></a>
-<a class="sourceLine" id="cb4-25" data-line-number="25"><span class="co">#&gt; 2 EQ-5D-5L   VT   Canada</span></a>
-<a class="sourceLine" id="cb4-26" data-line-number="26"><span class="co">#&gt; 3 EQ-5D-5L   VT    China</span></a>
-<a class="sourceLine" id="cb4-27" data-line-number="27"><span class="co">#&gt; 4 EQ-5D-5L   VT  Denmark</span></a>
-<a class="sourceLine" id="cb4-28" data-line-number="28"><span class="co">#&gt; 5 EQ-5D-5L   VT  England</span></a>
-<a class="sourceLine" id="cb4-29" data-line-number="29"><span class="co">#&gt; 6 EQ-5D-5L   VT Ethiopia</span></a>
+<a class="sourceLine" id="cb4-23" data-line-number="23"><span class="co">#&gt;    Version Type Country</span></a>
+<a class="sourceLine" id="cb4-24" data-line-number="24"><span class="co">#&gt; 1 EQ-5D-5L   VT Belgium</span></a>
+<a class="sourceLine" id="cb4-25" data-line-number="25"><span class="co">#&gt; 2 EQ-5D-5L   VT  Canada</span></a>
+<a class="sourceLine" id="cb4-26" data-line-number="26"><span class="co">#&gt; 3 EQ-5D-5L   VT   China</span></a>
+<a class="sourceLine" id="cb4-27" data-line-number="27"><span class="co">#&gt; 4 EQ-5D-5L   VT Denmark</span></a>
+<a class="sourceLine" id="cb4-28" data-line-number="28"><span class="co">#&gt; 5 EQ-5D-5L   VT   Egypt</span></a>
+<a class="sourceLine" id="cb4-29" data-line-number="29"><span class="co">#&gt; 6 EQ-5D-5L   VT England</span></a>
 <a class="sourceLine" id="cb4-30" data-line-number="30"></a>
 <a class="sourceLine" id="cb4-31" data-line-number="31"><span class="co"># Return all UK value sets.</span></a>
 <a class="sourceLine" id="cb4-32" data-line-number="32"><span class="kw">valuesets</span>(<span class="dt">country=</span><span class="st">&quot;UK&quot;</span>)</a>
 <a class="sourceLine" id="cb4-33" data-line-number="33"><span class="co">#&gt;    Version Type Country</span></a>
 <a class="sourceLine" id="cb4-34" data-line-number="34"><span class="co">#&gt; 1 EQ-5D-3L  TTO      UK</span></a>
 <a class="sourceLine" id="cb4-35" data-line-number="35"><span class="co">#&gt; 2 EQ-5D-3L  VAS      UK</span></a>
-<a class="sourceLine" id="cb4-36" data-line-number="36"><span class="co">#&gt; 3 EQ-5D-5L   CW      UK</span></a></code></pre></div>
+<a class="sourceLine" id="cb4-36" data-line-number="36"><span class="co">#&gt; 3 EQ-5D-5L   CW      UK</span></a>
+<a class="sourceLine" id="cb4-37" data-line-number="37"><span class="co">#&gt; 4 EQ-5D-3L  DSU      UK</span></a>
+<a class="sourceLine" id="cb4-38" data-line-number="38"><span class="co">#&gt; 5 EQ-5D-5L  DSU      UK</span></a>
+<a class="sourceLine" id="cb4-39" data-line-number="39"></a>
+<a class="sourceLine" id="cb4-40" data-line-number="40"><span class="co"># Return all EQ-5D-5L to EQ-5D-3L DSU value sets.</span></a>
+<a class="sourceLine" id="cb4-41" data-line-number="41"><span class="kw">valuesets</span>(<span class="dt">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>)</a>
+<a class="sourceLine" id="cb4-42" data-line-number="42"><span class="co">#&gt;    Version Type     Country</span></a>
+<a class="sourceLine" id="cb4-43" data-line-number="43"><span class="co">#&gt; 1 EQ-5D-5L  DSU       China</span></a>
+<a class="sourceLine" id="cb4-44" data-line-number="44"><span class="co">#&gt; 2 EQ-5D-5L  DSU     Germany</span></a>
+<a class="sourceLine" id="cb4-45" data-line-number="45"><span class="co">#&gt; 3 EQ-5D-5L  DSU       Japan</span></a>
+<a class="sourceLine" id="cb4-46" data-line-number="46"><span class="co">#&gt; 4 EQ-5D-5L  DSU Netherlands</span></a>
+<a class="sourceLine" id="cb4-47" data-line-number="47"><span class="co">#&gt; 5 EQ-5D-5L  DSU  SouthKorea</span></a>
+<a class="sourceLine" id="cb4-48" data-line-number="48"><span class="co">#&gt; 6 EQ-5D-5L  DSU       Spain</span></a>
+<a class="sourceLine" id="cb4-49" data-line-number="49"><span class="co">#&gt; 7 EQ-5D-5L  DSU          UK</span></a></code></pre></div>
 </div>
 <div id="analysis-of-eq-5d-profiles" class="section level2">
 <h2>Analysis of EQ-5D Profiles</h2>
-<p>A number of methods have been published that enable the analysis of EQ-5D profiles, most recently in the open access book Methods for Analysing and Reporting EQ-5D Data by <a href="https://www.springer.com/gp/book/9783030476212">Devlin, Janssen and Parkin</a>. The eq5d package includes R implentations of some of the methods from this book and from other sources that may be of use in analysing EQ-5D data.</p>
+<p>A number of methods have been published that enable the analysis of EQ-5D profiles, most recently in the open access book Methods for Analysing and Reporting EQ-5D Data by <a href="https://link.springer.com/book/10.1007/978-3-030-47622-9">Devlin, Janssen and Parkin</a>. The eq5d package includes R implentations of some of the methods from this book and from other sources that may be of use in analysing EQ-5D data.</p>
 <div id="cumulative-frequency-analysis" class="section level3">
 <h3>Cumulative frequency analysis</h3>
 <p>The <strong><em>eq5dcf</em></strong> function calculates the frequency, percentage, cumulative frequency and cumulative percentage for each five digit profile in an EQ-5D dataset. Either a vector of five digit profiles or a data.frame of indiviual dimensions can be passed to this function in order to summarise data in this way.</p>
@@ -565,29 +593,29 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb9-8" data-line-number="8">       )</a>
 <a class="sourceLine" id="cb9-9" data-line-number="9"></a>
 <a class="sourceLine" id="cb9-10" data-line-number="10"><span class="kw">eq5dds</span>(dat, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>)</a>
-<a class="sourceLine" id="cb9-11" data-line-number="11"><span class="co">#&gt;     MO SC   UA   PD   AD</span></a>
-<a class="sourceLine" id="cb9-12" data-line-number="12"><span class="co">#&gt; 1 41.7 50 41.7 16.7 33.3</span></a>
-<a class="sourceLine" id="cb9-13" data-line-number="13"><span class="co">#&gt; 2 25.0 25 25.0 41.7 50.0</span></a>
-<a class="sourceLine" id="cb9-14" data-line-number="14"><span class="co">#&gt; 3 33.3 25 33.3 41.7 16.7</span></a>
+<a class="sourceLine" id="cb9-11" data-line-number="11"><span class="co">#&gt;     MO   SC   UA   PD   AD</span></a>
+<a class="sourceLine" id="cb9-12" data-line-number="12"><span class="co">#&gt; 1 25.0 25.0 25.0 41.7 41.7</span></a>
+<a class="sourceLine" id="cb9-13" data-line-number="13"><span class="co">#&gt; 2 58.3 41.7 41.7 41.7 16.7</span></a>
+<a class="sourceLine" id="cb9-14" data-line-number="14"><span class="co">#&gt; 3 16.7 33.3 33.3 16.7 41.7</span></a>
 <a class="sourceLine" id="cb9-15" data-line-number="15"></a>
 <a class="sourceLine" id="cb9-16" data-line-number="16"><span class="kw">eq5dds</span>(dat, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">counts=</span><span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb9-17" data-line-number="17"><span class="co">#&gt;   MO SC UA PD AD</span></a>
-<a class="sourceLine" id="cb9-18" data-line-number="18"><span class="co">#&gt; 1  5  6  5  2  4</span></a>
-<a class="sourceLine" id="cb9-19" data-line-number="19"><span class="co">#&gt; 2  3  3  3  5  6</span></a>
-<a class="sourceLine" id="cb9-20" data-line-number="20"><span class="co">#&gt; 3  4  3  4  5  2</span></a>
+<a class="sourceLine" id="cb9-18" data-line-number="18"><span class="co">#&gt; 1  3  3  3  5  5</span></a>
+<a class="sourceLine" id="cb9-19" data-line-number="19"><span class="co">#&gt; 2  7  5  5  5  2</span></a>
+<a class="sourceLine" id="cb9-20" data-line-number="20"><span class="co">#&gt; 3  2  4  4  2  5</span></a>
 <a class="sourceLine" id="cb9-21" data-line-number="21"></a>
 <a class="sourceLine" id="cb9-22" data-line-number="22"><span class="kw">eq5dds</span>(dat, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">by=</span><span class="st">&quot;Sex&quot;</span>)</a>
 <a class="sourceLine" id="cb9-23" data-line-number="23"><span class="co">#&gt; data[, by]: Female</span></a>
 <a class="sourceLine" id="cb9-24" data-line-number="24"><span class="co">#&gt;     MO   SC   UA   PD   AD</span></a>
-<a class="sourceLine" id="cb9-25" data-line-number="25"><span class="co">#&gt; 1 33.3 50.0 66.7 16.7 33.3</span></a>
-<a class="sourceLine" id="cb9-26" data-line-number="26"><span class="co">#&gt; 2 33.3 16.7  0.0 50.0 66.7</span></a>
-<a class="sourceLine" id="cb9-27" data-line-number="27"><span class="co">#&gt; 3 33.3 33.3 33.3 33.3  0.0</span></a>
+<a class="sourceLine" id="cb9-25" data-line-number="25"><span class="co">#&gt; 1 33.3 16.7 16.7 33.3 33.3</span></a>
+<a class="sourceLine" id="cb9-26" data-line-number="26"><span class="co">#&gt; 2 33.3 33.3 33.3 33.3 16.7</span></a>
+<a class="sourceLine" id="cb9-27" data-line-number="27"><span class="co">#&gt; 3 33.3 50.0 50.0 33.3 50.0</span></a>
 <a class="sourceLine" id="cb9-28" data-line-number="28"><span class="co">#&gt; ------------------------------------------------------------ </span></a>
 <a class="sourceLine" id="cb9-29" data-line-number="29"><span class="co">#&gt; data[, by]: Male</span></a>
-<a class="sourceLine" id="cb9-30" data-line-number="30"><span class="co">#&gt;     MO   SC   UA   PD   AD</span></a>
-<a class="sourceLine" id="cb9-31" data-line-number="31"><span class="co">#&gt; 1 50.0 50.0 16.7 16.7 33.3</span></a>
-<a class="sourceLine" id="cb9-32" data-line-number="32"><span class="co">#&gt; 2 16.7 33.3 50.0 33.3 33.3</span></a>
-<a class="sourceLine" id="cb9-33" data-line-number="33"><span class="co">#&gt; 3 33.3 16.7 33.3 50.0 33.3</span></a></code></pre></div>
+<a class="sourceLine" id="cb9-30" data-line-number="30"><span class="co">#&gt;     MO   SC   UA PD   AD</span></a>
+<a class="sourceLine" id="cb9-31" data-line-number="31"><span class="co">#&gt; 1 16.7 33.3 33.3 50 50.0</span></a>
+<a class="sourceLine" id="cb9-32" data-line-number="32"><span class="co">#&gt; 2 83.3 50.0 50.0 50 16.7</span></a>
+<a class="sourceLine" id="cb9-33" data-line-number="33"><span class="co">#&gt; 3  0.0 16.7 16.7  0 33.3</span></a></code></pre></div>
 </div>
 </div>
 <div id="helper-functions" class="section level2">
