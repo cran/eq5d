@@ -1,6 +1,5 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
 <!-- badges: start -->
 
 [![R build
@@ -68,7 +67,7 @@ mapping between the EQ-5D-5L and EQ-5D-3L descriptive systems.
 
 The recently published age and sex conditional based mapping data by the
 [NICE Decision Support
-Unit](https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l)
+Unit](https://www.sheffield.ac.uk/nice-dsu/methods-development/mapping-eq-5d-5l-3l)
 are also now part of the package. These enable age-sex based EQ-5D-3L to
 EQ-5D-5L and EQ-5D-5L to EQ-5D-3L mappings from dimensions and exact or
 approximate utility index scores.
@@ -170,47 +169,59 @@ function. The results can be filtered by EQ-5D version, value set type
 or by country.
 
 ``` r
-# Return all value sets (top 6 returned for brevity).
-head(valuesets())
-#>    Version Type   Country
-#> 1 EQ-5D-3L  TTO Argentina
-#> 2 EQ-5D-3L  TTO Australia
-#> 3 EQ-5D-3L  TTO    Brazil
-#> 4 EQ-5D-3L  TTO    Canada
-#> 5 EQ-5D-3L  TTO     Chile
-#> 6 EQ-5D-3L  TTO     China
+# Return TTO value sets with PubMed IDs and DOIs (top 6 returned for brevity).
+head(valuesets(type="TTO", references=c("PubMed", "DOI")))
+#>    Version Type   Country   PubMed                              DOI
+#> 1 EQ-5D-3L  TTO Argentina 19900257 10.1111/j.1524-4733.2008.00468.x
+#> 2 EQ-5D-3L  TTO Australia 21914515       10.1016/j.jval.2011.04.009
+#> 3 EQ-5D-3L  TTO    Brazil 29702778       10.1016/j.vhri.2013.01.009
+#> 4 EQ-5D-3L  TTO    Canada 22328929     10.1371/journal.pone.0031115
+#> 5 EQ-5D-3L  TTO     Chile 22152184      10.1016/j.jval.2011.09.002.
+#> 6 EQ-5D-3L  TTO     China 25128053       10.1016/j.jval.2014.05.007
 
-# Return VAS based value sets (top 6 returned for brevity).
-head(valuesets(type="VAS"))
-#>    Version Type Country
-#> 1 EQ-5D-3L  VAS Belgium
-#> 2 EQ-5D-3L  VAS Denmark
-#> 3 EQ-5D-3L  VAS  Europe
-#> 4 EQ-5D-3L  VAS Finland
-#> 5 EQ-5D-3L  VAS Germany
-#> 6 EQ-5D-3L  VAS    Iran
+# Return VAS value sets with ISBN and external URL (top 6 returned for brevity).
+head(valuesets(type="VAS", references=c("ISBN", "ExternalURL")))
+#>    Version Type Country          ISBN
+#> 1 EQ-5D-3L  VAS Belgium 1-4020-5511-0
+#> 2 EQ-5D-3L  VAS Denmark 1-4020-5511-1
+#> 3 EQ-5D-3L  VAS  Europe 1-4020-5511-2
+#> 4 EQ-5D-3L  VAS Finland 1-4020-5511-3
+#> 5 EQ-5D-3L  VAS Germany 1-4020-5511-4
+#> 6 EQ-5D-3L  VAS    Iran          <NA>
+#>                                                              ExternalURL
+#> 1 https://eq-5dpublications.euroqol.org/download?id=0_54011&fileId=54420
+#> 2 https://eq-5dpublications.euroqol.org/download?id=0_54011&fileId=54420
+#> 3 https://eq-5dpublications.euroqol.org/download?id=0_54011&fileId=54420
+#> 4 https://eq-5dpublications.euroqol.org/download?id=0_54011&fileId=54420
+#> 5 https://eq-5dpublications.euroqol.org/download?id=0_54011&fileId=54420
+#> 6                                                                   <NA>
 
 # Return EQ-5D-5L value sets (top 6 returned for brevity).
 head(valuesets(version="5L"))
-#>    Version Type Country
-#> 1 EQ-5D-5L   VT Belgium
-#> 2 EQ-5D-5L   VT  Canada
-#> 3 EQ-5D-5L   VT   China
-#> 4 EQ-5D-5L   VT Denmark
-#> 5 EQ-5D-5L   VT   Egypt
-#> 6 EQ-5D-5L   VT England
+#>    Version Type     Country   PubMed                        DOI ISBN
+#> 1 EQ-5D-5L   CW     Denmark 22867780 10.1016/j.jval.2012.02.008 <NA>
+#> 2 EQ-5D-5L   CW      France 22867780 10.1016/j.jval.2012.02.008 <NA>
+#> 3 EQ-5D-5L   CW     Germany 22867780 10.1016/j.jval.2012.02.008 <NA>
+#> 4 EQ-5D-5L   CW       Japan 22867780 10.1016/j.jval.2012.02.008 <NA>
+#> 5 EQ-5D-5L   CW Netherlands 22867780 10.1016/j.jval.2012.02.008 <NA>
+#> 6 EQ-5D-5L   CW      Russia 33713323 10.1007/s11136-021-02804-6 <NA>
+#>   ExternalURL
+#> 1        <NA>
+#> 2        <NA>
+#> 3        <NA>
+#> 4        <NA>
+#> 5        <NA>
+#> 6        <NA>
 
-# Return all UK value sets.
-valuesets(country="UK")
-#>    Version Type Country
-#> 1 EQ-5D-3L  TTO      UK
-#> 2 EQ-5D-3L  VAS      UK
-#> 3 EQ-5D-5L   CW      UK
-#> 4 EQ-5D-3L  DSU      UK
-#> 5 EQ-5D-5L  DSU      UK
+# Return all French value sets.
+valuesets(country="France")
+#>    Version Type Country   PubMed                        DOI ISBN ExternalURL
+#> 1 EQ-5D-3L  TTO  France 21935715  10.1007/s10198-011-0351-x <NA>        <NA>
+#> 2 EQ-5D-5L   CW  France 22867780 10.1016/j.jval.2012.02.008 <NA>        <NA>
+#> 3 EQ-5D-5L   VT  France 31912325 10.1007/s40273-019-00876-4 <NA>        <NA>
 
-# Return all EQ-5D-5L to EQ-5D-3L DSU value sets.
-valuesets(type="DSU", version="5L")
+# Return all EQ-5D-5L to EQ-5D-3L DSU value sets without references.
+valuesets(type="DSU", version="5L", references=NULL)
 #>    Version Type     Country
 #> 1 EQ-5D-5L  DSU       China
 #> 2 EQ-5D-5L  DSU     Germany
@@ -403,29 +414,29 @@ dat <- data.frame(
        )
 
 eq5dds(dat, version="3L")
-#>     MO SC   UA   PD   AD
-#> 1 33.3 25 16.7 25.0 58.3
-#> 2 50.0 50 50.0 16.7 25.0
-#> 3 16.7 25 33.3 58.3 16.7
+#>     MO   SC   UA   PD   AD
+#> 1 25.0 33.3 16.7 33.3 41.7
+#> 2 33.3 41.7 33.3 33.3 16.7
+#> 3 41.7 25.0 50.0 33.3 41.7
 
 eq5dds(dat, version="3L", counts=TRUE)
 #>   MO SC UA PD AD
-#> 1  4  3  2  3  7
-#> 2  6  6  6  2  3
-#> 3  2  3  4  7  2
+#> 1  3  4  2  4  5
+#> 2  4  5  4  4  2
+#> 3  5  3  6  4  5
 
 eq5dds(dat, version="3L", by="Sex")
 #> data[, by]: Female
-#>     MO   SC   UA   PD  AD
-#> 1  0.0 33.3 33.3 16.7 100
-#> 2 66.7 50.0 16.7 16.7   0
-#> 3 33.3 16.7 50.0 66.7   0
+#>     MO SC   UA   PD   AD
+#> 1  0.0  0 16.7 16.7 50.0
+#> 2 66.7 50 33.3 33.3 16.7
+#> 3 33.3 50 50.0 50.0 33.3
 #> ------------------------------------------------------------ 
 #> data[, by]: Male
-#>     MO   SC   UA   PD   AD
-#> 1 66.7 16.7  0.0 33.3 16.7
-#> 2 33.3 50.0 83.3 16.7 50.0
-#> 3  0.0 33.3 16.7 50.0 33.3
+#>   MO   SC   UA   PD   AD
+#> 1 50 66.7 16.7 50.0 33.3
+#> 2  0 33.3 33.3 33.3 16.7
+#> 3 50  0.0 50.0 16.7 50.0
 ```
 
 ## Helper functions
@@ -500,7 +511,7 @@ results.
 ![Shiny EQ-5D app excel data
 formats](man/figures/shiny_app_excel_scores.png)
 
-The app is launched using the ***shiny\_eq5d*** function.
+The app is launched using the ***shiny_eq5d*** function.
 
 ``` r
 shiny_eq5d()

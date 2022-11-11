@@ -12,26 +12,26 @@
 #'   version.
 #' @param type string specifying method type used in deriving value set scores.
 #'   Options are TTO or VAS for EQ-5D-3L, VT for EQ-5D-5L, CW for EQ-5D-5L
-#'   crosswalk conversion valuesets, RCW for EQ-5D-3L reverse crosswalk 
+#'   crosswalk conversion valuesets, RCW for EQ-5D-3L reverse crosswalk
 #'   conversion valuesets and DSU for the NICE Decision Support Unit age-sex
 #'   based EQ-5D-3L to EQ-5D-5L and EQ-5D-5L to EQ-5D-3L mappings
 #' @param country string of value set country name used.
 #' @param ignore.invalid logical to indicate whether to ignore dimension data
 #'   with invalid, incomplete or missing data.
-#' @param ... character vectors for column names when using a data.frame. Use 
-#'   "dimensions" (default c("MO", "SC", "UA", "PD" and "AD")), "five.digit" 
-#'   (default "State") or "utility", "age", "sex" and "bwidth" (defaults 
-#'   "Utility", "Age", "Sex" and "bwidth") for NICE DSU mapping. When a single 
-#'   NICE DSU score is being calculated "age", "sex" and "bwidth" are also 
-#'   used. See \code{\link{eq5dmap}} for valid options. 
+#' @param ... character vectors for column names when using a data.frame. Use
+#'   "dimensions" (default c("MO", "SC", "UA", "PD" and "AD")), "five.digit"
+#'   (default "State") or "utility", "age", "sex" and "bwidth" (defaults
+#'   "Utility", "Age", "Sex" and "bwidth") for NICE DSU mapping. When a single
+#'   NICE DSU score is being calculated "age", "sex" and "bwidth" are also
+#'   used. See \code{\link{eq5dmap}} for valid options.
 #' @return a numeric vector of utility index scores.
 #' @examples
 #' eq5d(scores=c(MO=1,SC=2,UA=3,PD=4,AD=5), type="VT",
 #'  country="Indonesia", version="5L")
 #' eq5d(scores=c(MO=3,SC=2,UA=3,PD=2,AD=3),
 #'  type="TTO", version="3L", country="Germany")
-#'  
-#' eq5d(0.922, country="UK", version="5L", type="DSU", 
+#'
+#' eq5d(0.922, country="UK", version="5L", type="DSU",
 #'  age=18, sex="male")
 #'
 #' scores.df <- data.frame(
@@ -72,7 +72,7 @@ eq5d.data.frame <- function(scores, version=NULL, type=NULL, country=NULL, ignor
   if(!is.null(args$sex)) {sex <- args$sex}
   if(!is.null(args$age)) {age <- args$age}
   if(!is.null(args$bwidth)) {bwidth <- args$bwidth}
-  
+
   eq5d.columns <- NULL
   if(all(dimensions %in% names(scores))) {
     colnames(scores)[match(dimensions, colnames(scores))] <- .getDimensionNames()
@@ -84,11 +84,11 @@ eq5d.data.frame <- function(scores, version=NULL, type=NULL, country=NULL, ignor
   } else {
     stop("Unable to identify EQ-5D dimensions in data.frame.")
   }
-  
+
   if(!bwidth %in% names(scores)) {
     bwidth <- NULL
   }
-  
+
   res <- apply(scores, 1, function(x) {
     if(type=="DSU") {
       if(is.null(bwidth)) {
@@ -116,8 +116,8 @@ eq5d.default <- function(scores, version=NULL, type=NULL, country=NULL, ignore.i
     stop("EQ-5D version not one of 3L, 5L or Y.")
 
   .length = length(scores)
-  if(!is.null(type) && type=="DSU") { 
-    .range <- .getDSURange(country, version) 
+  if(!is.null(type) && type=="DSU") {
+    .range <- .getDSURange(country, version)
   }
 
   if(is.character(scores)){
@@ -172,7 +172,7 @@ eq5d.default <- function(scores, version=NULL, type=NULL, country=NULL, ignore.i
       stop("Age must be between 18 and 100, or an age category between 1 and 5.")
     }
   }
-  
+
   if(!is.null(args$sex) && is.na(.getSex(args$sex))) {
     if(ignore.invalid) {
       return(NA)
@@ -180,7 +180,7 @@ eq5d.default <- function(scores, version=NULL, type=NULL, country=NULL, ignore.i
       stop("Sex must be Male, Female, M or F (case insensitive).")
     }
   }
-  
+
   .length <- length(scores)
   if(.length==5 && any(!scores %in% 1:.getNumberLevels(version))) { #if length==5
     if(ignore.invalid) {
@@ -189,7 +189,7 @@ eq5d.default <- function(scores, version=NULL, type=NULL, country=NULL, ignore.i
       stop("Missing/non-numeric dimension found.")
     }
   }
-  
+
   if(.length==1) {
     if(bwidth==0 && !.isValidUtility(scores, country, version)) {
       if(ignore.invalid) {
@@ -233,19 +233,24 @@ eq5d.default <- function(scores, version=NULL, type=NULL, country=NULL, ignore.i
 #'     in the \code{eq5d} package.
 #'
 #' @param type string EQ-5D value set type. TTO or VAS for EQ-5D-3L, VT for EQ-5D-5L,
-#'   CW for EQ-5D-5L crosswalk conversion dataset, or DSU for NICE Decision Support
+#'   cTTO for EQ-5D-Y, CW for EQ-5D-5L crosswalk conversion dataset, or DSU for NICE Decision Support
 #'   Unit's EQ-5D-5L to EQ-5D-3L and EQ-5D-3L to EQ-5D-5L mappings.
-#' @param version string either 3L or 5L.
+#' @param version string either 3L, 5L or Y.
 #' @param country string one of the countries for which there is a value set.
+#' @param references character vector of reference columns. One or more of PubMed, 
+#'   DOI, ISBN or ExternalURL. Default is all. Reference columns can be removed by 
+#'   setting argument to NULL.
 #'
-#' @return A data.frame containing the EQ-5D version, value set type and country
+#' @return A data.frame containing the EQ-5D version, the value set type and
+#'   country, along with PubMed IDs, DOIs, ISBNs and external URLs where available.
 #' @examples
 #' valuesets()
 #' valuesets(type="TTO")
 #' valuesets(version="5L")
 #' valuesets(country="UK")
+#' valuesets(version="Y", references=c("DOI", "PubMed"))
 #' @export
-valuesets <- function(type=NULL, version=NULL, country=NULL) {
+valuesets <- function(type=NULL, version=NULL, country=NULL, references=c("PubMed", "DOI", "ISBN", "ExternalURL")) {
   if(!is.null(version)) version <- paste0("EQ-5D-", version)
 
   tto <- data.frame(Version="EQ-5D-3L", Type="TTO", Country=colnames(TTO))
@@ -262,5 +267,16 @@ valuesets <- function(type=NULL, version=NULL, country=NULL) {
   if(!is.null(version)) vs <- vs[vs$Version==version,]
   if(!is.null(country)) vs <- vs[vs$Country==country,]
   rownames(vs) <- NULL
-  return(vs)
+  
+  vs <- merge(vs, REFERENCES, by = c("Version", "Type", "Country"))
+  
+  if(is.null(references)) {
+    vs <- vs[,c("Version", "Type", "Country")]
+  } else if (all(references %in% c("PubMed", "DOI", "ISBN", "ExternalURL"))) {
+    vs <- vs[,c("Version", "Type", "Country", references)]
+  } else {
+    stop("One or more reference columns not found. Valid options are one or more of PubMed, DOI, ISBN and ExternalURL.")
+  }
+  
+  vs
 }

@@ -4,19 +4,29 @@
 \alias{valuesets}
 \title{Get the available EQ-5D value sets.}
 \usage{
-valuesets(type = NULL, version = NULL, country = NULL)
+valuesets(
+  type = NULL,
+  version = NULL,
+  country = NULL,
+  references = c("PubMed", "DOI", "ISBN", "ExternalURL")
+)
 }
 \arguments{
 \item{type}{string EQ-5D value set type. TTO or VAS for EQ-5D-3L, VT for EQ-5D-5L,
-CW for EQ-5D-5L crosswalk conversion dataset, or DSU for NICE Decision Support
+cTTO for EQ-5D-Y, CW for EQ-5D-5L crosswalk conversion dataset, or DSU for NICE Decision Support
 Unit's EQ-5D-5L to EQ-5D-3L and EQ-5D-3L to EQ-5D-5L mappings.}
 
-\item{version}{string either 3L or 5L.}
+\item{version}{string either 3L, 5L or Y.}
 
 \item{country}{string one of the countries for which there is a value set.}
+
+\item{references}{character vector of reference columns. One or more of PubMed, 
+DOI, ISBN or ExternalURL. Default is all. Reference columns can be removed by 
+setting argument to NULL.}
 }
 \value{
-A data.frame containing the EQ-5D version, value set type and country
+A data.frame containing the EQ-5D version, the value set type and
+  country, along with PubMed IDs, DOIs, ISBNs and external URLs where available.
 }
 \description{
 \code{valuesets} returns a data.frame of the available EQ-5D value sets
@@ -27,4 +37,5 @@ valuesets()
 valuesets(type="TTO")
 valuesets(version="5L")
 valuesets(country="UK")
+valuesets(version="Y", references=c("DOI", "PubMed"))
 }
