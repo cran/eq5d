@@ -48,7 +48,7 @@ scores.df <- data.frame(
 eq5d(scores.df, country="Canada", version="5L", type="VT")
 
 #data.frame using five digit format
-scores.df2 <- data.frame(state=c(11111,25532,34241,43332,52141))
+scores.df2 <- data.frame(state=c(11111, 25532, 34241, 43332, 52141))
 
 eq5d(scores.df2, country="Canada", version="5L", type="VT", five.digit="state")
 
@@ -58,20 +58,20 @@ eq5d(scores.df2$state, country="Canada", version="5L", type="VT")
 
 
 ## ----valuesets----------------------------------------------------------------
-# Return all value sets (top 6 returned for brevity).
-head(valuesets())
+# Return TTO value sets with PubMed IDs and DOIs (top 6 returned for brevity).
+head(valuesets(type="TTO", references=c("PubMed","DOI")))
 
-# Return VAS based value sets (top 6 returned for brevity).
-head(valuesets(type="VAS"))
+# Return VAS value sets with ISBN and external URL (top 6 returned for brevity).
+head(valuesets(type="VAS", references=c("ISBN","ExternalURL")))
 
 # Return EQ-5D-5L value sets (top 6 returned for brevity).
 head(valuesets(version="5L"))
 
-# Return all UK value sets.
-valuesets(country="UK")
+# Return all French value sets.
+valuesets(country="France")
 
-# Return all EQ-5D-5L to EQ-5D-3L DSU value sets.
-valuesets(type="DSU", version="5L")
+# Return all EQ-5D-5L to EQ-5D-3L DSU value sets without references.
+valuesets(type="DSU", version="5L", references=NULL)
 
 
 ## ----eq5dcf-------------------------------------------------------------------
@@ -92,7 +92,7 @@ lss(c(MO=1,SC=2,UA=3,PD=2,AD=1), version="3L")
 
 lss(55555, version="5L")
 
-lss(c(11111,12345, 55555), version="5L")
+lss(c(11111, 12345, 55555), version="5L")
 
 
 ## ----eq5dlfs------------------------------------------------------------------
@@ -100,7 +100,7 @@ lfs(c(MO=1,SC=2,UA=3,PD=2,AD=1), version="3L")
 
 lfs(55555, version="5L")
 
-lfs(c(11111,12345, 55555), version="5L")
+lfs(c(11111, 12345, 55555), version="5L")
 
 
 ## ----pchc---------------------------------------------------------------------
@@ -127,13 +127,100 @@ res2
 res3 <- pchc(pre, post, version="3L", no.problems=TRUE, totals=TRUE, by.dimension=TRUE)
 res3
 
+#Don't summarise. Return all classifications
+res4 <- pchc(pre, post, version="3L", no.problems=TRUE, totals=FALSE, summary=FALSE)
+head(res4)
+
+
+## ----ps-----------------------------------------------------------------------
+library(readxl)
+
+#load example data
+data <- read_excel(system.file("extdata", "eq5d3l_example.xlsx", package="eq5d"))
+
+#use first 50 entries of each group as pre/post
+pre <- data[data$Group=="Group1",][1:50,]
+post <- data[data$Group=="Group2",][1:50,]
+
+res <- ps(pre, post, version="3L")
+res
+
+
+## ----hpg----------------------------------------------------------------------
+library(readxl)
+
+#load example data
+data <- read_excel(system.file("extdata", "eq5d3l_example.xlsx", package="eq5d"))
+
+#use first 50 entries of each group as pre/post
+pre <- data[data$Group=="Group1",][1:50,]
+post <- data[data$Group=="Group2",][1:50,]
+
+#run hpg function on data.frames
+
+#Show pre/post rankings and PCHC classification
+res <- hpg(pre, post, country="UK", version="3L", type="TTO")
+head(res)
+
+#Plot data using ggplot2
+library(ggplot2)
+
+ggplot(res, aes(Post, Pre, color=PCHC)) +
+  geom_point(aes(shape=PCHC)) +
+  coord_cartesian(xlim=c(1,243), ylim=c(1,243)) +
+  scale_x_continuous(breaks=c(1,243)) +
+  scale_y_continuous(breaks=c(1,243)) +
+  annotate("segment", x=1, y=1, xend=243, yend=243, colour="black") +
+  theme(panel.border=element_blank(), panel.grid.minor=element_blank()) +
+  xlab("Post-treatment") +
+  ylab("Pre-treatment")
+
+
+## ----shannon------------------------------------------------------------------
+library(readxl)
+
+#load example data
+data <- read_excel(system.file("extdata", "eq5d3l_example.xlsx", package="eq5d"))
+
+#Shannon's H', H' max and J' for the whole dataset
+shannon(data, version="3L", by.dimension=FALSE)
+
+#Shannon's H', H' max and J' for each dimension
+res <- shannon(data, version="3L", by.dimension=TRUE)
+
+#Convert to data.frame for ease of viewing
+do.call(rbind, res)
+
+
+## ----hsdi---------------------------------------------------------------------
+#load example data
+data <- read_excel(system.file("extdata", "eq5d3l_example.xlsx", package="eq5d"))
+
+#Calculate HSDI
+hsdi <- hsdi(data, version="3L")
+
+#Plot HSDC
+cf <- eq5dcf(data, version="3L", proportions=T)
+cf$CumulativeState <- 1:nrow(cf)/nrow(cf)
+
+#Plot data using ggplot2
+library(ggplot2)
+
+ggplot(cf, aes(CumulativeProp, CumulativeState)) + 
+  geom_line(color="#FF9999") + 
+  annotate("segment", x=0, y=0, xend=1, yend=1, colour="black") +  
+  annotate("text", x=0.5, y=0.9, label=paste0("HSDI=", hsdi)) +
+  theme(panel.border=element_blank(), panel.grid.minor=element_blank()) +
+  coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
+  xlab("Cumulative proportion of observations") +
+  ylab("Cumulative proportion of profiles")
+
 
 ## ----eq5dds-------------------------------------------------------------------
-
 dat <- data.frame(
          matrix(
-           sample(1:3,5*12, replace=TRUE),12,5, 
-           dimnames=list(1:12,c("MO","SC","UA","PD","AD"))
+           sample(1:3, 5*12, replace=TRUE), 12, 5, 
+           dimnames=list(1:12, c("MO","SC","UA","PD","AD"))
          ),
          Sex=rep(c("Male", "Female"))
        )
@@ -167,6 +254,7 @@ scores <- eq5d(data, country="UK", version="3L", type="TTO")
 
 # Top 6 scores
 head(scores)
+
 
 ## ----shiny, echo=TRUE, eval=FALSE---------------------------------------------
 #  shiny_eq5d()

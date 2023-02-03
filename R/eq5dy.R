@@ -32,7 +32,7 @@ eq5dy <- function(scores, country=NULL) {
   survey <- setNames(survey[[country]], rownames(survey))
 
   values <- c(survey["FullHealth"],
-              .intercept(scores, survey), .dimensionScores(scores, survey))
+              .intercept(scores, survey), .power(scores, survey), .all3(scores, survey))
 
   return(round(sum(values, na.rm = TRUE), digits=3))
 }
@@ -41,5 +41,22 @@ eq5dy <- function(scores, country=NULL) {
   ##at least one mobility, care, activity, pain, anxiety > 1
   if(sum(scores) > 5 && !is.na(survey["Intercept"])) {
     survey["Intercept"] ##At least one 2 or 3 (constant)
+  }
+}
+
+.power <- function(scores, survey) {
+  ##check for power coefficient - currently only Indonesia.
+  if(!is.na(survey["Power"])) {
+    .total <- -1*sum(.dimensionScores(scores, survey)*-1, na.rm = TRUE)^survey["Power"]
+  } else {
+    .total <- sum(.dimensionScores(scores, survey), na.rm = TRUE)
+  }
+  return(.total)
+}
+
+.all3 <- function(scores, survey) {
+  ##all dimensions == 3
+  if(all(scores == 3) && !is.na(survey["A3"])) {
+    survey["A3"]
   }
 }

@@ -15,6 +15,7 @@ shinyUI(
         uiOutput("choose_version"),
         uiOutput("choose_country"),
         uiOutput("choose_type"),
+        uiOutput("reference_links"),
         uiOutput("choose_calc_type"),
         conditionalPanel(
           condition = "input.multi == 'multiple'",
@@ -60,17 +61,21 @@ shinyUI(
           uiOutput("choose_group_members")
         ),
         conditionalPanel(
-          condition = "input.plot_type != 'radar' && input.plot_type != 'summary'",
+          condition = "input.plot_type != 'radar' && input.plot_type != 'summary' && input.plot_type != 'hsdc'",
           uiOutput("show_average"),
           uiOutput("choose_average_method")
         ),
         conditionalPanel(
-          condition = "input.plot_type != 'radar' && input.plot_type != 'summary'",
+          condition = "input.plot_type != 'radar' && input.plot_type != 'summary' && input.plot_type != 'hsdc'",
           uiOutput("show_paired")
         ),
         conditionalPanel(
-          condition = "input.plot_type == 'radar' || input.plot_type == 'summary'",
+          condition = "input.plot_type == 'radar' || input.plot_type == 'summary' || input.plot_type == 'hsdc'",
           uiOutput("choose_summary_type")
+        ),
+        conditionalPanel(
+          condition = "input.plot_type == 'radar' || input.plot_type == 'summary' || input.plot_type == 'hsdc'",
+          uiOutput("choose_shannon_type")
         )
       ),
       mainPanel(

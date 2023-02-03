@@ -12,20 +12,23 @@
 
 <meta name="author" content="Fraser Morton and Jagtar Singh Nijjar" />
 
-<meta name="date" content="2022-11-11" />
+<meta name="date" content="2023-02-03" />
 
 <title>Calculating EQ-5D indices and summarising profiles with eq5d</title>
 
-<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
-// be compatible with the behavior of Pandoc < 2.8).
-document.addEventListener('DOMContentLoaded', function(e) {
-  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
-  var i, h, a;
-  for (i = 0; i < hs.length; i++) {
-    h = hs[i];
-    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
-    a = h.attributes;
-    while (a.length > 0) h.removeAttribute(a[0].name);
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
   }
 });
 </script>
@@ -40,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function(e) {
     </style>
 
 
+
 <style type="text/css">
   code {
     white-space: pre;
@@ -49,19 +53,19 @@ document.addEventListener('DOMContentLoaded', function(e) {
   }
 </style>
 <style type="text/css" data-origin="pandoc">
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -81,7 +85,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -121,13 +125,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -331,481 +342,494 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Calculating EQ-5D indices and summarising
-profiles with eq5d</h1>
+<h1 class="title toc-ignore">Calculating EQ-5D indices and summarising profiles with eq5d</h1>
 <h4 class="author">Fraser Morton and Jagtar Singh Nijjar</h4>
-<h4 class="date">11 November 2022</h4>
+<h4 class="date">03 February 2023</h4>
 
 
 
 <div id="eq-5d" class="section level1">
 <h1>EQ-5D</h1>
-<p>EQ-5D is a popular health related quality of life instrument used in
-the clinical and economic evaluation of health care. Developed by the <a href="https://euroqol.org/">EuroQol</a> group, the instrument consists
-of two components: health state description and evaluation.</p>
-<p>For the description component a subject self-rates their health in
-terms of five dimensions; mobility, self-care, usual activities,
-pain/discomfort, and anxiety/depression using either a three-level (<a href="https://euroqol.org/eq-5d-instruments/eq-5d-3l-about/">EQ-5D-3L</a>
-and <a href="https://euroqol.org/eq-5d-instruments/eq-5d-y-about/">EQ-5D-Y</a>)
-or a five-level (<a href="https://euroqol.org/eq-5d-instruments/eq-5d-5l-about/">EQ-5D-5L</a>)
-scale.</p>
-<p>The evaluation component requires a patient to record their overall
-health status using a visual analogue scale (EQ-VAS).</p>
-<p>Following assessment the scores from the descriptive component can be
-reported as a five digit number ranging from 11111 (full health) to
-33333/55555 (worst health). A number of methods exist for analysing
-these five digit profiles. However, frequently they are converted to a
-single utility index using country specific value sets, which can be
-used in the clinical and economic evaluation of health care as well as
-in population health surveys.</p>
-<p>The eq5d package provides methods for the cross-sectional and
-longitudinal analysis of EQ-5D profiles and also the calculation of
-utility index scores from a subject’s dimension scores. Additionally, a
-<a href="https://shiny.rstudio.com">Shiny</a> app is included to enable
-the calculation, visualisation and automated statistical analysis of
-multiple EQ-5D index values via a web browser using EQ-5D dimension
-scores stored in CSV or Excel files.</p>
-<p>Value sets for EQ-5D-3L are available for many countries and have
-been produced using the time trade-off (TTO) valuation technique or the
-visual analogue scale (VAS) valuation technique. Some countries have TTO
-and VAS value sets for EQ-5D-3L. Additionally, EQ-5D-3L “reverse
-crosswalk” value sets published on the <a href="https://euroqol.org/support/analysis-tools/">EuroQol</a> website
-that enable EQ-5D-3L data to be mapped to EQ-5D-5L value sets are
-included.</p>
-<p>For EQ-5D-5L, a standardised valuation study protocol (EQ-VT) was
-developed by the EuroQol group based on the composite time trade-off
-(cTTO) valuation technique supplemented by a discrete choice experiment
-(DCE). The EuroQol group recommends users to use a standard value set
-where available.</p>
-<p>The EQ-5D-5L “crosswalk” value sets published by <a href="https://pubmed.ncbi.nlm.nih.gov/22867780/">van Hout <em>et
-al</em></a> as well as that for Russia are also included. The crosswalk
-value sets enable index values to be calculated for EQ-5D-5L data where
-no value set is available by mapping between the EQ-5D-5L and EQ-5D-3L
-descriptive systems.</p>
-<p>The recently published age and sex conditional based mapping data by
-the <a href="https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l">NICE
-Decision Support Unit</a> are also now part of the package. These enable
-age-sex based EQ-5D-3L to EQ-5D-5L and EQ-5D-5L to EQ-5D-3L mappings
-from dimensions and exact or approximate utility index scores.</p>
-<p>Additional information on EQ-5D can be found on the <a href="https://euroqol.org/">EuroQol</a> website as well as in <a href="https://doi.org/10.1007/1-4020-5511-0">Szende <em>et al</em>
-(2007)</a> and <a href="https://doi.org/10.1007/978-94-007-7596-1">Szende <em>et al</em>
-(2014)</a>. Advice on <a href="https://euroqol.org/eq-5d-instruments/eq-5d-3l-about/valuation/choosing-a-value-set/">choosing
-a value set</a> can also be found on the EuroQol website.</p>
+<p>EQ-5D is a popular health related quality of life instrument used in the clinical and economic evaluation of health care. Developed by the <a href="https://euroqol.org/">EuroQol</a> group, the instrument consists of two components: health state description and evaluation.</p>
+<p>For the description component a subject self-rates their health in terms of five dimensions; mobility, self-care, usual activities, pain/discomfort, and anxiety/depression using either a three-level (<a href="https://euroqol.org/eq-5d-instruments/eq-5d-3l-about/">EQ-5D-3L</a> and <a href="https://euroqol.org/eq-5d-instruments/eq-5d-y-about/">EQ-5D-Y</a>) or a five-level (<a href="https://euroqol.org/eq-5d-instruments/eq-5d-5l-about/">EQ-5D-5L</a>) scale.</p>
+<p>The evaluation component requires a patient to record their overall health status using a visual analogue scale (EQ-VAS).</p>
+<p>Following assessment the scores from the descriptive component can be reported as a five digit number ranging from 11111 (full health) to 33333/55555 (worst health). A number of methods exist for analysing these five digit profiles. However, frequently they are converted to a single utility index using country specific value sets, which can be used in the clinical and economic evaluation of health care as well as in population health surveys.</p>
+<p>The eq5d package provides methods for the cross-sectional and longitudinal analysis of EQ-5D profiles and also the calculation of utility index scores from a subject’s dimension scores. Additionally, a <a href="https://shiny.rstudio.com">Shiny</a> app is included to enable the calculation, visualisation and automated statistical analysis of multiple EQ-5D index values via a web browser using EQ-5D dimension scores stored in CSV or Excel files.</p>
+<p>Value sets for EQ-5D-3L are available for many countries and have been produced using the time trade-off (TTO) valuation technique or the visual analogue scale (VAS) valuation technique. Some countries have TTO and VAS value sets for EQ-5D-3L. Additionally, EQ-5D-3L “reverse crosswalk” value sets published on the <a href="https://euroqol.org/support/analysis-tools/">EuroQol</a> website that enable EQ-5D-3L data to be mapped to EQ-5D-5L value sets are included.</p>
+<p>For EQ-5D-5L, a standardised valuation study protocol (EQ-VT) was developed by the EuroQol group based on the composite time trade-off (cTTO) valuation technique supplemented by a discrete choice experiment (DCE). The EuroQol group recommends users to use a standard value set where available.</p>
+<p>The EQ-5D-5L “crosswalk” value sets published by <a href="https://pubmed.ncbi.nlm.nih.gov/22867780/">van Hout <em>et al</em></a> as well as that for Russia are also included. The crosswalk value sets enable index values to be calculated for EQ-5D-5L data where no value set is available by mapping between the EQ-5D-5L and EQ-5D-3L descriptive systems.</p>
+<p>The recently published age and sex conditional based mapping data by the <a href="https://www.sheffield.ac.uk/nice-dsu/methods-development/mapping-eq-5d-5l-3l">NICE Decision Support Unit</a> are also now part of the package. These enable age-sex based EQ-5D-3L to EQ-5D-5L and EQ-5D-5L to EQ-5D-3L mappings from dimensions and exact or approximate utility index scores.</p>
+<p>Additional information on EQ-5D can be found on the <a href="https://euroqol.org/">EuroQol</a> website as well as in <a href="https://doi.org/10.1007/1-4020-5511-0">Szende <em>et al</em> (2007)</a> and <a href="https://doi.org/10.1007/978-94-007-7596-1">Szende <em>et al</em> (2014)</a>. Advice on <a href="https://euroqol.org/eq-5d-instruments/eq-5d-3l-about/valuation/choosing-a-value-set/">choosing a value set</a> can also be found on the EuroQol website.</p>
 <div id="installation" class="section level2">
 <h2>Installation</h2>
 <p>You can install the released version of eq5d from <a href="https://CRAN.R-project.org">CRAN</a> with:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;eq5d&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">install.packages</span>(<span class="st">&quot;eq5d&quot;</span>)</span></code></pre></div>
 <p>And the development version from <a href="https://github.com/">GitHub</a> with:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(&quot;devtools&quot;)</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;fragla/eq5d&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># install.packages(&quot;devtools&quot;)</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;fragla/eq5d&quot;</span>)</span></code></pre></div>
 </div>
 <div id="quick-start" class="section level2">
 <h2>Quick Start</h2>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(eq5d)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#single calculation</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#named vector MO, SC, UA, PD and AD represent mobility, self-care, usual activites, pain/discomfort and anxiety/depression, respectfully.</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>scores <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">MO=</span><span class="dv">1</span>,<span class="at">SC=</span><span class="dv">2</span>,<span class="at">UA=</span><span class="dv">3</span>,<span class="at">PD=</span><span class="dv">2</span>,<span class="at">AD=</span><span class="dv">1</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#EQ-5D-3L using the UK TTO value set</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span>scores, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;TTO&quot;</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.329</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#Using five digit format</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">12321</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;TTO&quot;</span>)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.329</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#EQ-5D-Y using the Slovenian cTTO value set</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">13321</span>, <span class="at">country=</span><span class="st">&quot;Slovenia&quot;</span>, <span class="at">version=</span><span class="st">&quot;Y&quot;</span>, <span class="at">type=</span><span class="st">&quot;cTTO&quot;</span>)</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.295</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#EQ-5D-5L crosswalk</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">55555</span>, <span class="at">country=</span><span class="st">&quot;Spain&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;CW&quot;</span>)</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] -0.654</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#EQ-5D-3L reverse crosswalk</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">33333</span>, <span class="at">country=</span><span class="st">&quot;Germany&quot;</span>, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;RCW&quot;</span>)</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] -0.329</span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#EQ-5D-5L to EQ-5D-3L NICE DSU mapping</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#Using dimensions</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="fu">c</span>(<span class="at">MO=</span><span class="dv">1</span>,<span class="at">SC=</span><span class="dv">2</span>,<span class="at">UA=</span><span class="dv">3</span>,<span class="at">PD=</span><span class="dv">4</span>,<span class="at">AD=</span><span class="dv">5</span>), <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">age=</span><span class="dv">23</span>, <span class="at">sex=</span><span class="st">&quot;male&quot;</span>)</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.083</span></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#Using exact utility score</span></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="fl">0.922</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="at">age=</span><span class="dv">18</span>, <span class="at">sex=</span><span class="st">&quot;male&quot;</span>)</span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.893</span></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#Using approximate utility score</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="fl">0.435</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="at">age=</span><span class="dv">30</span>, <span class="at">sex=</span><span class="st">&quot;female&quot;</span>, <span class="at">bwidth=</span><span class="fl">0.0001</span>)</span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.302</span></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co">#multiple calculations using the Canadian VT value set</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#data.frame with individual dimensions</span></span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>scores.df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>  <span class="at">MO=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>), <span class="at">SC=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>), <span class="at">UA=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>), <span class="at">PD=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">4</span>), <span class="at">AD=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>)</span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5d</span>(scores.df, <span class="at">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;VT&quot;</span>)</span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="co">#data.frame using five digit format</span></span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>scores.df2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">state=</span><span class="fu">c</span>(<span class="dv">11111</span>,<span class="dv">25532</span>,<span class="dv">34241</span>,<span class="dv">43332</span>,<span class="dv">52141</span>))</span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5d</span>(scores.df2, <span class="at">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;VT&quot;</span>, <span class="at">five.digit=</span><span class="st">&quot;state&quot;</span>)</span>
-<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="co">#or using a vector</span></span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5d</span>(scores.df2<span class="sc">$</span>state, <span class="at">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;VT&quot;</span>)</span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">library</span>(eq5d)</span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="co">#single calculation</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="co">#named vector MO, SC, UA, PD and AD represent mobility, self-care, usual activites, pain/discomfort and anxiety/depression, respectfully.</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>scores &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">MO=</span><span class="dv">1</span>,<span class="dt">SC=</span><span class="dv">2</span>,<span class="dt">UA=</span><span class="dv">3</span>,<span class="dt">PD=</span><span class="dv">2</span>,<span class="dt">AD=</span><span class="dv">1</span>)</span>
+<span id="cb3-7"><a href="#cb3-7"></a></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="co">#EQ-5D-3L using the UK TTO value set</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a><span class="kw">eq5d</span>(<span class="dt">scores=</span>scores, <span class="dt">country=</span><span class="st">&quot;UK&quot;</span>, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;TTO&quot;</span>)</span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="co">#&gt; [1] 0.329</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a></span>
+<span id="cb3-12"><a href="#cb3-12"></a><span class="co">#Using five digit format</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="kw">eq5d</span>(<span class="dt">scores=</span><span class="dv">12321</span>, <span class="dt">country=</span><span class="st">&quot;UK&quot;</span>, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;TTO&quot;</span>)</span>
+<span id="cb3-14"><a href="#cb3-14"></a><span class="co">#&gt; [1] 0.329</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a></span>
+<span id="cb3-16"><a href="#cb3-16"></a><span class="co">#EQ-5D-Y using the Slovenian cTTO value set</span></span>
+<span id="cb3-17"><a href="#cb3-17"></a><span class="kw">eq5d</span>(<span class="dt">scores=</span><span class="dv">13321</span>, <span class="dt">country=</span><span class="st">&quot;Slovenia&quot;</span>, <span class="dt">version=</span><span class="st">&quot;Y&quot;</span>, <span class="dt">type=</span><span class="st">&quot;cTTO&quot;</span>)</span>
+<span id="cb3-18"><a href="#cb3-18"></a><span class="co">#&gt; [1] 0.295</span></span>
+<span id="cb3-19"><a href="#cb3-19"></a></span>
+<span id="cb3-20"><a href="#cb3-20"></a><span class="co">#EQ-5D-5L crosswalk</span></span>
+<span id="cb3-21"><a href="#cb3-21"></a><span class="kw">eq5d</span>(<span class="dt">scores=</span><span class="dv">55555</span>, <span class="dt">country=</span><span class="st">&quot;Spain&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;CW&quot;</span>)</span>
+<span id="cb3-22"><a href="#cb3-22"></a><span class="co">#&gt; [1] -0.654</span></span>
+<span id="cb3-23"><a href="#cb3-23"></a></span>
+<span id="cb3-24"><a href="#cb3-24"></a><span class="co">#EQ-5D-3L reverse crosswalk</span></span>
+<span id="cb3-25"><a href="#cb3-25"></a><span class="kw">eq5d</span>(<span class="dt">scores=</span><span class="dv">33333</span>, <span class="dt">country=</span><span class="st">&quot;Germany&quot;</span>, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;RCW&quot;</span>)</span>
+<span id="cb3-26"><a href="#cb3-26"></a><span class="co">#&gt; [1] -0.329</span></span>
+<span id="cb3-27"><a href="#cb3-27"></a></span>
+<span id="cb3-28"><a href="#cb3-28"></a><span class="co">#EQ-5D-5L to EQ-5D-3L NICE DSU mapping</span></span>
+<span id="cb3-29"><a href="#cb3-29"></a></span>
+<span id="cb3-30"><a href="#cb3-30"></a><span class="co">#Using dimensions</span></span>
+<span id="cb3-31"><a href="#cb3-31"></a><span class="kw">eq5d</span>(<span class="kw">c</span>(<span class="dt">MO=</span><span class="dv">1</span>,<span class="dt">SC=</span><span class="dv">2</span>,<span class="dt">UA=</span><span class="dv">3</span>,<span class="dt">PD=</span><span class="dv">4</span>,<span class="dt">AD=</span><span class="dv">5</span>), <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="dt">country=</span><span class="st">&quot;UK&quot;</span>, <span class="dt">age=</span><span class="dv">23</span>, <span class="dt">sex=</span><span class="st">&quot;male&quot;</span>)</span>
+<span id="cb3-32"><a href="#cb3-32"></a><span class="co">#&gt; [1] 0.083</span></span>
+<span id="cb3-33"><a href="#cb3-33"></a></span>
+<span id="cb3-34"><a href="#cb3-34"></a><span class="co">#Using exact utility score</span></span>
+<span id="cb3-35"><a href="#cb3-35"></a><span class="kw">eq5d</span>(<span class="fl">0.922</span>, <span class="dt">country=</span><span class="st">&quot;UK&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="dt">age=</span><span class="dv">18</span>, <span class="dt">sex=</span><span class="st">&quot;male&quot;</span>)</span>
+<span id="cb3-36"><a href="#cb3-36"></a><span class="co">#&gt; [1] 0.893</span></span>
+<span id="cb3-37"><a href="#cb3-37"></a></span>
+<span id="cb3-38"><a href="#cb3-38"></a><span class="co">#Using approximate utility score</span></span>
+<span id="cb3-39"><a href="#cb3-39"></a><span class="kw">eq5d</span>(<span class="fl">0.435</span>, <span class="dt">country=</span><span class="st">&quot;UK&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="dt">age=</span><span class="dv">30</span>, <span class="dt">sex=</span><span class="st">&quot;female&quot;</span>, <span class="dt">bwidth=</span><span class="fl">0.0001</span>)</span>
+<span id="cb3-40"><a href="#cb3-40"></a><span class="co">#&gt; [1] 0.302</span></span>
+<span id="cb3-41"><a href="#cb3-41"></a></span>
+<span id="cb3-42"><a href="#cb3-42"></a><span class="co">#multiple calculations using the Canadian VT value set</span></span>
+<span id="cb3-43"><a href="#cb3-43"></a></span>
+<span id="cb3-44"><a href="#cb3-44"></a><span class="co">#data.frame with individual dimensions</span></span>
+<span id="cb3-45"><a href="#cb3-45"></a>scores.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</span>
+<span id="cb3-46"><a href="#cb3-46"></a>  <span class="dt">MO=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>), <span class="dt">SC=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>), <span class="dt">UA=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>), <span class="dt">PD=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">4</span>), <span class="dt">AD=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>)</span>
+<span id="cb3-47"><a href="#cb3-47"></a>)</span>
+<span id="cb3-48"><a href="#cb3-48"></a></span>
+<span id="cb3-49"><a href="#cb3-49"></a><span class="kw">eq5d</span>(scores.df, <span class="dt">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;VT&quot;</span>)</span>
+<span id="cb3-50"><a href="#cb3-50"></a><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></span>
+<span id="cb3-51"><a href="#cb3-51"></a></span>
+<span id="cb3-52"><a href="#cb3-52"></a><span class="co">#data.frame using five digit format</span></span>
+<span id="cb3-53"><a href="#cb3-53"></a>scores.df2 &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">state=</span><span class="kw">c</span>(<span class="dv">11111</span>, <span class="dv">25532</span>, <span class="dv">34241</span>, <span class="dv">43332</span>, <span class="dv">52141</span>))</span>
+<span id="cb3-54"><a href="#cb3-54"></a></span>
+<span id="cb3-55"><a href="#cb3-55"></a><span class="kw">eq5d</span>(scores.df2, <span class="dt">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;VT&quot;</span>, <span class="dt">five.digit=</span><span class="st">&quot;state&quot;</span>)</span>
+<span id="cb3-56"><a href="#cb3-56"></a><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></span>
+<span id="cb3-57"><a href="#cb3-57"></a></span>
+<span id="cb3-58"><a href="#cb3-58"></a><span class="co">#or using a vector</span></span>
+<span id="cb3-59"><a href="#cb3-59"></a></span>
+<span id="cb3-60"><a href="#cb3-60"></a><span class="kw">eq5d</span>(scores.df2<span class="op">$</span>state, <span class="dt">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;VT&quot;</span>)</span>
+<span id="cb3-61"><a href="#cb3-61"></a><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></span></code></pre></div>
 </div>
 <div id="value-sets" class="section level2">
 <h2>Value sets</h2>
-<p>The available value sets can be viewed using the
-<strong><em>valuesets</em></strong> function. The results can be
-filtered by EQ-5D version, value set type or by country.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Return all value sets (top 6 returned for brevity).</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">valuesets</span>())</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Version Type     Country PubMed  DOI ISBN</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 EQ-5D-3L  DSU       China     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 EQ-5D-3L  DSU     Germany     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 EQ-5D-3L  DSU       Japan     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 EQ-5D-3L  DSU Netherlands     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 EQ-5D-3L  DSU  SouthKorea     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 EQ-5D-3L  DSU       Spain     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                        ExternalURL</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Return VAS based value sets (top 6 returned for brevity).</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">valuesets</span>(<span class="at">type=</span><span class="st">&quot;VAS&quot;</span>))</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Version Type Country   PubMed                       DOI          ISBN</span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 EQ-5D-3L  VAS Belgium 19582490 10.1007/s10198-009-0167-0 1-4020-5511-0</span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 EQ-5D-3L  VAS Denmark       NA                      &lt;NA&gt; 1-4020-5511-1</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 EQ-5D-3L  VAS  Europe       NA                      &lt;NA&gt; 1-4020-5511-2</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 EQ-5D-3L  VAS Finland       NA                      &lt;NA&gt; 1-4020-5511-3</span></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 EQ-5D-3L  VAS Germany       NA                      &lt;NA&gt; 1-4020-5511-4</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 EQ-5D-3L  VAS    Iran 27186384       10.5812/ircmj.21584          &lt;NA&gt;</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                              ExternalURL</span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 https://eq-5dpublications.euroqol.org/download?id=0_54011&amp;fileId=54420</span></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 https://eq-5dpublications.euroqol.org/download?id=0_54011&amp;fileId=54420</span></span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 https://eq-5dpublications.euroqol.org/download?id=0_54011&amp;fileId=54420</span></span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 https://eq-5dpublications.euroqol.org/download?id=0_54011&amp;fileId=54420</span></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 https://eq-5dpublications.euroqol.org/download?id=0_54011&amp;fileId=54420</span></span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                                                   &lt;NA&gt;</span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Return EQ-5D-5L value sets (top 6 returned for brevity).</span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">valuesets</span>(<span class="at">version=</span><span class="st">&quot;5L&quot;</span>))</span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Version Type     Country   PubMed                        DOI ISBN</span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 EQ-5D-5L   CW     Denmark 22867780 10.1016/j.jval.2012.02.008 &lt;NA&gt;</span></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 EQ-5D-5L   CW      France 22867780 10.1016/j.jval.2012.02.008 &lt;NA&gt;</span></span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 EQ-5D-5L   CW     Germany 22867780 10.1016/j.jval.2012.02.008 &lt;NA&gt;</span></span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 EQ-5D-5L   CW       Japan 22867780 10.1016/j.jval.2012.02.008 &lt;NA&gt;</span></span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 EQ-5D-5L   CW Netherlands 22867780 10.1016/j.jval.2012.02.008 &lt;NA&gt;</span></span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 EQ-5D-5L   CW      Russia 33713323 10.1007/s11136-021-02804-6 &lt;NA&gt;</span></span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ExternalURL</span></span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1        &lt;NA&gt;</span></span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2        &lt;NA&gt;</span></span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3        &lt;NA&gt;</span></span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4        &lt;NA&gt;</span></span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5        &lt;NA&gt;</span></span>
-<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6        &lt;NA&gt;</span></span>
-<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Return all UK value sets.</span></span>
-<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a><span class="fu">valuesets</span>(<span class="at">country=</span><span class="st">&quot;UK&quot;</span>)</span>
-<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Version Type Country   PubMed                              DOI          ISBN</span></span>
-<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 EQ-5D-3L  DSU      UK       NA                             &lt;NA&gt;          &lt;NA&gt;</span></span>
-<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 EQ-5D-3L  TTO      UK  9366889 10.1097/00005650-199711000-00002          &lt;NA&gt;</span></span>
-<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 EQ-5D-3L  VAS      UK       NA                             &lt;NA&gt; 1-4020-5511-3</span></span>
-<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 EQ-5D-5L   CW      UK 22867780       10.1016/j.jval.2012.02.008          &lt;NA&gt;</span></span>
-<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 EQ-5D-5L  DSU      UK       NA                             &lt;NA&gt;          &lt;NA&gt;</span></span>
-<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                        ExternalURL</span></span>
-<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                                                             &lt;NA&gt;</span></span>
-<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3           https://eq-5dpublications.euroqol.org/download?id=0_54011&amp;fileId=54420</span></span>
-<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                                                             &lt;NA&gt;</span></span>
-<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a><span class="co"># Return all EQ-5D-5L to EQ-5D-3L DSU value sets.</span></span>
-<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a><span class="fu">valuesets</span>(<span class="at">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>)</span>
-<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Version Type     Country PubMed  DOI ISBN</span></span>
-<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 EQ-5D-5L  DSU       China     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 EQ-5D-5L  DSU     Germany     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 EQ-5D-5L  DSU       Japan     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 EQ-5D-5L  DSU Netherlands     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 EQ-5D-5L  DSU  SouthKorea     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 EQ-5D-5L  DSU       Spain     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 EQ-5D-5L  DSU          UK     NA &lt;NA&gt; &lt;NA&gt;</span></span>
-<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                        ExternalURL</span></span>
-<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span>
-<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 https://nicedsu.sites.sheffield.ac.uk/methods-development/mapping-eq-5d-5l-to-3l</span></span></code></pre></div>
+<p>The available value sets can be viewed using the <strong><em>valuesets</em></strong> function. The results can be filtered by EQ-5D version, value set type or by country.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Return TTO value sets with PubMed IDs and DOIs (top 6 returned for brevity).</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="kw">head</span>(<span class="kw">valuesets</span>(<span class="dt">type=</span><span class="st">&quot;TTO&quot;</span>, <span class="dt">references=</span><span class="kw">c</span>(<span class="st">&quot;PubMed&quot;</span>,<span class="st">&quot;DOI&quot;</span>)))</span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="co">#&gt;    Version Type   Country   PubMed                              DOI</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co">#&gt; 1 EQ-5D-3L  TTO Argentina 19900257 10.1111/j.1524-4733.2008.00468.x</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="co">#&gt; 2 EQ-5D-3L  TTO Australia 21914515       10.1016/j.jval.2011.04.009</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="co">#&gt; 3 EQ-5D-3L  TTO    Brazil 29702778       10.1016/j.vhri.2013.01.009</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="co">#&gt; 4 EQ-5D-3L  TTO    Canada 22328929     10.1371/journal.pone.0031115</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="co">#&gt; 5 EQ-5D-3L  TTO     Chile 22152184      10.1016/j.jval.2011.09.002.</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a><span class="co">#&gt; 6 EQ-5D-3L  TTO     China 25128053       10.1016/j.jval.2014.05.007</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a></span>
+<span id="cb4-11"><a href="#cb4-11"></a><span class="co"># Return VAS value sets with ISBN and external URL (top 6 returned for brevity).</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a><span class="kw">head</span>(<span class="kw">valuesets</span>(<span class="dt">type=</span><span class="st">&quot;VAS&quot;</span>, <span class="dt">references=</span><span class="kw">c</span>(<span class="st">&quot;ISBN&quot;</span>,<span class="st">&quot;ExternalURL&quot;</span>)))</span>
+<span id="cb4-13"><a href="#cb4-13"></a><span class="co">#&gt;    Version Type Country          ISBN</span></span>
+<span id="cb4-14"><a href="#cb4-14"></a><span class="co">#&gt; 1 EQ-5D-3L  VAS Belgium 1-4020-5511-0</span></span>
+<span id="cb4-15"><a href="#cb4-15"></a><span class="co">#&gt; 2 EQ-5D-3L  VAS Denmark 1-4020-5511-1</span></span>
+<span id="cb4-16"><a href="#cb4-16"></a><span class="co">#&gt; 3 EQ-5D-3L  VAS  Europe 1-4020-5511-2</span></span>
+<span id="cb4-17"><a href="#cb4-17"></a><span class="co">#&gt; 4 EQ-5D-3L  VAS Finland 1-4020-5511-3</span></span>
+<span id="cb4-18"><a href="#cb4-18"></a><span class="co">#&gt; 5 EQ-5D-3L  VAS Germany 1-4020-5511-4</span></span>
+<span id="cb4-19"><a href="#cb4-19"></a><span class="co">#&gt; 6 EQ-5D-3L  VAS    Iran          &lt;NA&gt;</span></span>
+<span id="cb4-20"><a href="#cb4-20"></a><span class="co">#&gt;                                                              ExternalURL</span></span>
+<span id="cb4-21"><a href="#cb4-21"></a><span class="co">#&gt; 1 https://eq-5dpublications.euroqol.org/download?id=0_54011&amp;fileId=54420</span></span>
+<span id="cb4-22"><a href="#cb4-22"></a><span class="co">#&gt; 2 https://eq-5dpublications.euroqol.org/download?id=0_54011&amp;fileId=54420</span></span>
+<span id="cb4-23"><a href="#cb4-23"></a><span class="co">#&gt; 3 https://eq-5dpublications.euroqol.org/download?id=0_54011&amp;fileId=54420</span></span>
+<span id="cb4-24"><a href="#cb4-24"></a><span class="co">#&gt; 4 https://eq-5dpublications.euroqol.org/download?id=0_54011&amp;fileId=54420</span></span>
+<span id="cb4-25"><a href="#cb4-25"></a><span class="co">#&gt; 5 https://eq-5dpublications.euroqol.org/download?id=0_54011&amp;fileId=54420</span></span>
+<span id="cb4-26"><a href="#cb4-26"></a><span class="co">#&gt; 6                                                                   &lt;NA&gt;</span></span>
+<span id="cb4-27"><a href="#cb4-27"></a></span>
+<span id="cb4-28"><a href="#cb4-28"></a><span class="co"># Return EQ-5D-5L value sets (top 6 returned for brevity).</span></span>
+<span id="cb4-29"><a href="#cb4-29"></a><span class="kw">head</span>(<span class="kw">valuesets</span>(<span class="dt">version=</span><span class="st">&quot;5L&quot;</span>))</span>
+<span id="cb4-30"><a href="#cb4-30"></a><span class="co">#&gt;    Version Type     Country   PubMed                        DOI ISBN</span></span>
+<span id="cb4-31"><a href="#cb4-31"></a><span class="co">#&gt; 1 EQ-5D-5L   CW     Denmark 22867780 10.1016/j.jval.2012.02.008 &lt;NA&gt;</span></span>
+<span id="cb4-32"><a href="#cb4-32"></a><span class="co">#&gt; 2 EQ-5D-5L   CW      France 22867780 10.1016/j.jval.2012.02.008 &lt;NA&gt;</span></span>
+<span id="cb4-33"><a href="#cb4-33"></a><span class="co">#&gt; 3 EQ-5D-5L   CW     Germany 22867780 10.1016/j.jval.2012.02.008 &lt;NA&gt;</span></span>
+<span id="cb4-34"><a href="#cb4-34"></a><span class="co">#&gt; 4 EQ-5D-5L   CW       Japan 22867780 10.1016/j.jval.2012.02.008 &lt;NA&gt;</span></span>
+<span id="cb4-35"><a href="#cb4-35"></a><span class="co">#&gt; 5 EQ-5D-5L   CW Netherlands 22867780 10.1016/j.jval.2012.02.008 &lt;NA&gt;</span></span>
+<span id="cb4-36"><a href="#cb4-36"></a><span class="co">#&gt; 6 EQ-5D-5L   CW      Russia 33713323 10.1007/s11136-021-02804-6 &lt;NA&gt;</span></span>
+<span id="cb4-37"><a href="#cb4-37"></a><span class="co">#&gt;   ExternalURL</span></span>
+<span id="cb4-38"><a href="#cb4-38"></a><span class="co">#&gt; 1        &lt;NA&gt;</span></span>
+<span id="cb4-39"><a href="#cb4-39"></a><span class="co">#&gt; 2        &lt;NA&gt;</span></span>
+<span id="cb4-40"><a href="#cb4-40"></a><span class="co">#&gt; 3        &lt;NA&gt;</span></span>
+<span id="cb4-41"><a href="#cb4-41"></a><span class="co">#&gt; 4        &lt;NA&gt;</span></span>
+<span id="cb4-42"><a href="#cb4-42"></a><span class="co">#&gt; 5        &lt;NA&gt;</span></span>
+<span id="cb4-43"><a href="#cb4-43"></a><span class="co">#&gt; 6        &lt;NA&gt;</span></span>
+<span id="cb4-44"><a href="#cb4-44"></a></span>
+<span id="cb4-45"><a href="#cb4-45"></a><span class="co"># Return all French value sets.</span></span>
+<span id="cb4-46"><a href="#cb4-46"></a><span class="kw">valuesets</span>(<span class="dt">country=</span><span class="st">&quot;France&quot;</span>)</span>
+<span id="cb4-47"><a href="#cb4-47"></a><span class="co">#&gt;    Version Type Country   PubMed                        DOI ISBN ExternalURL</span></span>
+<span id="cb4-48"><a href="#cb4-48"></a><span class="co">#&gt; 1 EQ-5D-3L  TTO  France 21935715  10.1007/s10198-011-0351-x &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span id="cb4-49"><a href="#cb4-49"></a><span class="co">#&gt; 2 EQ-5D-5L   CW  France 22867780 10.1016/j.jval.2012.02.008 &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span id="cb4-50"><a href="#cb4-50"></a><span class="co">#&gt; 3 EQ-5D-5L   VT  France 31912325 10.1007/s40273-019-00876-4 &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span id="cb4-51"><a href="#cb4-51"></a></span>
+<span id="cb4-52"><a href="#cb4-52"></a><span class="co"># Return all EQ-5D-5L to EQ-5D-3L DSU value sets without references.</span></span>
+<span id="cb4-53"><a href="#cb4-53"></a><span class="kw">valuesets</span>(<span class="dt">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>, <span class="dt">references=</span><span class="ot">NULL</span>)</span>
+<span id="cb4-54"><a href="#cb4-54"></a><span class="co">#&gt;    Version Type     Country</span></span>
+<span id="cb4-55"><a href="#cb4-55"></a><span class="co">#&gt; 1 EQ-5D-5L  DSU       China</span></span>
+<span id="cb4-56"><a href="#cb4-56"></a><span class="co">#&gt; 2 EQ-5D-5L  DSU     Germany</span></span>
+<span id="cb4-57"><a href="#cb4-57"></a><span class="co">#&gt; 3 EQ-5D-5L  DSU       Japan</span></span>
+<span id="cb4-58"><a href="#cb4-58"></a><span class="co">#&gt; 4 EQ-5D-5L  DSU Netherlands</span></span>
+<span id="cb4-59"><a href="#cb4-59"></a><span class="co">#&gt; 5 EQ-5D-5L  DSU  SouthKorea</span></span>
+<span id="cb4-60"><a href="#cb4-60"></a><span class="co">#&gt; 6 EQ-5D-5L  DSU       Spain</span></span>
+<span id="cb4-61"><a href="#cb4-61"></a><span class="co">#&gt; 7 EQ-5D-5L  DSU          UK</span></span></code></pre></div>
 </div>
 <div id="analysis-of-eq-5d-profiles" class="section level2">
 <h2>Analysis of EQ-5D Profiles</h2>
-<p>A number of methods have been published that enable the analysis of
-EQ-5D profiles, most recently in the open access book Methods for
-Analysing and Reporting EQ-5D Data by <a href="https://link.springer.com/book/10.1007/978-3-030-47622-9">Devlin,
-Janssen and Parkin</a>. The eq5d package includes R implentations of
-some of the methods from this book and from other sources that may be of
-use in analysing EQ-5D data.</p>
+<p>A number of methods have been published that enable the analysis of EQ-5D profiles, most recently in the open access book Methods for Analysing and Reporting EQ-5D Data by <a href="https://link.springer.com/book/10.1007/978-3-030-47622-9">Devlin, Janssen and Parkin</a>. The eq5d package includes R implentations of some of the methods from this book and from other sources that may be of use in analysing EQ-5D data.</p>
 <div id="cumulative-frequency-analysis" class="section level3">
 <h3>Cumulative frequency analysis</h3>
-<p>The <strong><em>eq5dcf</em></strong> function calculates the
-frequency, percentage, cumulative frequency and cumulative percentage
-for each five digit profile in an EQ-5D dataset. Either a vector of five
-digit profiles or a data.frame of indiviual dimensions can be passed to
-this function in order to summarise data in this way.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#load example data</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;eq5d3l_example.xlsx&quot;</span>, <span class="at">package=</span><span class="st">&quot;eq5d&quot;</span>))</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#run eq5dcf function on a data.frame</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">eq5dcf</span>(data, <span class="st">&quot;3L&quot;</span>)</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Return data.frame of cumulative frequency stats (top 6 returned for brevity).</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(res)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   State Frequency Percentage CumulativeFreq CumulativePerc</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 11121        36       18.0             36           18.0</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 11111        24       12.0             60           30.0</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 22222        21       10.5             81           40.5</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 22221        18        9.0             99           49.5</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 11221        12        6.0            111           55.5</span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 21221        11        5.5            122           61.0</span></span></code></pre></div>
+<p>The <strong><em>eq5dcf</em></strong> function calculates the frequency, percentage, cumulative frequency and cumulative percentage for each five digit profile in an EQ-5D dataset. Either a vector of five digit profiles or a data.frame of indiviual dimensions can be passed to this function in order to summarise data in this way.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">library</span>(readxl)</span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="co">#load example data</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a>data &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;eq5d3l_example.xlsx&quot;</span>, <span class="dt">package=</span><span class="st">&quot;eq5d&quot;</span>))</span>
+<span id="cb5-5"><a href="#cb5-5"></a></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="co">#run eq5dcf function on a data.frame</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a>res &lt;-<span class="st"> </span><span class="kw">eq5dcf</span>(data, <span class="st">&quot;3L&quot;</span>)</span>
+<span id="cb5-8"><a href="#cb5-8"></a></span>
+<span id="cb5-9"><a href="#cb5-9"></a><span class="co"># Return data.frame of cumulative frequency stats (top 6 returned for brevity).</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a><span class="kw">head</span>(res)</span>
+<span id="cb5-11"><a href="#cb5-11"></a><span class="co">#&gt;   State Frequency Percentage CumulativeFreq CumulativePerc</span></span>
+<span id="cb5-12"><a href="#cb5-12"></a><span class="co">#&gt; 1 11121        36       18.0             36           18.0</span></span>
+<span id="cb5-13"><a href="#cb5-13"></a><span class="co">#&gt; 2 11111        24       12.0             60           30.0</span></span>
+<span id="cb5-14"><a href="#cb5-14"></a><span class="co">#&gt; 3 22222        21       10.5             81           40.5</span></span>
+<span id="cb5-15"><a href="#cb5-15"></a><span class="co">#&gt; 4 22221        18        9.0             99           49.5</span></span>
+<span id="cb5-16"><a href="#cb5-16"></a><span class="co">#&gt; 5 11221        12        6.0            111           55.5</span></span>
+<span id="cb5-17"><a href="#cb5-17"></a><span class="co">#&gt; 6 21221        11        5.5            122           61.0</span></span></code></pre></div>
 </div>
 <div id="summarising-the-severity-of-eq-5d-profiles" class="section level3">
 <h3>Summarising the Severity of EQ-5D Profiles</h3>
-<p>The eq5d package includes methods for summarising the severity of
-EQ-5D health state. The Level Sum Score (LSS) treats each dimension’s
-level as a number rather than a category. Each number is added up to
-produce a score between 5 and 15 for EQ-5D-3L and 5 and 25 for
-EQ-5D-5L.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lss</span>(<span class="fu">c</span>(<span class="at">MO=</span><span class="dv">1</span>,<span class="at">SC=</span><span class="dv">2</span>,<span class="at">UA=</span><span class="dv">3</span>,<span class="at">PD=</span><span class="dv">2</span>,<span class="at">AD=</span><span class="dv">1</span>), <span class="at">version=</span><span class="st">&quot;3L&quot;</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 9</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lss</span>(<span class="dv">55555</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 25</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">lss</span>(<span class="fu">c</span>(<span class="dv">11111</span>,<span class="dv">12345</span>, <span class="dv">55555</span>), <span class="at">version=</span><span class="st">&quot;5L&quot;</span>)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1]  5 15 25</span></span></code></pre></div>
-<p>The Level Frequency Score (LFS) is an alternative method of
-summarising profile data developed by <a href="https://pubmed.ncbi.nlm.nih.gov/11189116">Oppe and de Charro</a>.
-Here the frequency of the levels for each health state are
-characterised. As described in Devlin, Janssen and Parkin’s book, the
-full health profile 11111 for EQ-5D-5L has 5, 1 s, no level 2, 3, 4 and
-5s, so the LFS is 50000; the health profile 55555 is 00005; profiles
-such as 31524 and 53412 would be 11111.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lfs</span>(<span class="fu">c</span>(<span class="at">MO=</span><span class="dv">1</span>,<span class="at">SC=</span><span class="dv">2</span>,<span class="at">UA=</span><span class="dv">3</span>,<span class="at">PD=</span><span class="dv">2</span>,<span class="at">AD=</span><span class="dv">1</span>), <span class="at">version=</span><span class="st">&quot;3L&quot;</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;221&quot;</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lfs</span>(<span class="dv">55555</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;00005&quot;</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">lfs</span>(<span class="fu">c</span>(<span class="dv">11111</span>,<span class="dv">12345</span>, <span class="dv">55555</span>), <span class="at">version=</span><span class="st">&quot;5L&quot;</span>)</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;50000&quot; &quot;11111&quot; &quot;00005&quot;</span></span></code></pre></div>
+<p>The eq5d package includes methods for summarising the severity of EQ-5D health state. The Level Sum Score (LSS) treats each dimension’s level as a number rather than a category. Each number is added up to produce a score between 5 and 15 for EQ-5D-3L and 5 and 25 for EQ-5D-5L.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">lss</span>(<span class="kw">c</span>(<span class="dt">MO=</span><span class="dv">1</span>,<span class="dt">SC=</span><span class="dv">2</span>,<span class="dt">UA=</span><span class="dv">3</span>,<span class="dt">PD=</span><span class="dv">2</span>,<span class="dt">AD=</span><span class="dv">1</span>), <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="co">#&gt; [1] 9</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="kw">lss</span>(<span class="dv">55555</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="co">#&gt; [1] 25</span></span>
+<span id="cb6-6"><a href="#cb6-6"></a></span>
+<span id="cb6-7"><a href="#cb6-7"></a><span class="kw">lss</span>(<span class="kw">c</span>(<span class="dv">11111</span>, <span class="dv">12345</span>, <span class="dv">55555</span>), <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>)</span>
+<span id="cb6-8"><a href="#cb6-8"></a><span class="co">#&gt; [1]  5 15 25</span></span></code></pre></div>
+<p>The Level Frequency Score (LFS) is an alternative method of summarising profile data developed by <a href="https://pubmed.ncbi.nlm.nih.gov/11189116">Oppe and de Charro</a>. Here the frequency of the levels for each health state are characterised. As described in Devlin, Janssen and Parkin’s book, the full health profile 11111 for EQ-5D-5L has 5, 1 s, no level 2, 3, 4 and 5s, so the LFS is 50000; the health profile 55555 is 00005; profiles such as 31524 and 53412 would be 11111.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">lfs</span>(<span class="kw">c</span>(<span class="dt">MO=</span><span class="dv">1</span>,<span class="dt">SC=</span><span class="dv">2</span>,<span class="dt">UA=</span><span class="dv">3</span>,<span class="dt">PD=</span><span class="dv">2</span>,<span class="dt">AD=</span><span class="dv">1</span>), <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>)</span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="co">#&gt; [1] &quot;221&quot;</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="kw">lfs</span>(<span class="dv">55555</span>, <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>)</span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="co">#&gt; [1] &quot;00005&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="kw">lfs</span>(<span class="kw">c</span>(<span class="dv">11111</span>, <span class="dv">12345</span>, <span class="dv">55555</span>), <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>)</span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="co">#&gt; [1] &quot;50000&quot; &quot;11111&quot; &quot;00005&quot;</span></span></code></pre></div>
 </div>
 <div id="paretian-classification-of-health-change" class="section level3">
 <h3>Paretian Classification of Health Change</h3>
-<p>The Paretian Classification of Health Change (PCHC) was developed by
-<a href="https://pubmed.ncbi.nlm.nih.gov/20623685">Devlin et al</a> in
-2010 and is used to compare changes in individuals over time. PCHC
-classifies the change in an individual’s health state as better
-(improvement in at least one dimension), worse (a deterioration in at
-least one dimension), mixed (improvements and deteriorations in
-dimensions) or there being no change in the health state. Those
-classified in the No change group with the 11111 health state can be
-separated into their own “No problems” group. PCHC can be calculated
-using the <strong><em>pchc</em></strong> function.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#load example data</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;eq5d3l_example.xlsx&quot;</span>, <span class="at">package=</span><span class="st">&quot;eq5d&quot;</span>))</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#use first 50 entries of each group as pre/post</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>pre <span class="ot">&lt;-</span> data[data<span class="sc">$</span>Group<span class="sc">==</span><span class="st">&quot;Group1&quot;</span>,][<span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>,]</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>post <span class="ot">&lt;-</span> data[data<span class="sc">$</span>Group<span class="sc">==</span><span class="st">&quot;Group2&quot;</span>,][<span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>,]</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#run pchc function on data.frames</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#Show no change, improve, worse, mixed without totals</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>res1 <span class="ot">&lt;-</span> <span class="fu">pchc</span>(pre, post, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">no.problems=</span><span class="cn">FALSE</span>, <span class="at">totals=</span><span class="cn">FALSE</span>)</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>res1</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Number Percent</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; No change         5      10</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Improve          32      64</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Worsen           10      20</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Mixed change      3       6</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#Show totals, but not those with no problems</span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>res2 <span class="ot">&lt;-</span> <span class="fu">pchc</span>(pre, post, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">no.problems=</span><span class="cn">FALSE</span>, <span class="at">totals=</span><span class="cn">TRUE</span>)</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>res2</span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Number Percent</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; No change         5      10</span></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Improve          32      64</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Worsen           10      20</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Mixed change      3       6</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total            50     100</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="co">#Show totals and no problems for each dimension</span></span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>res3 <span class="ot">&lt;-</span> <span class="fu">pchc</span>(pre, post, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">no.problems=</span><span class="cn">TRUE</span>, <span class="at">totals=</span><span class="cn">TRUE</span>, <span class="at">by.dimension=</span><span class="cn">TRUE</span>)</span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>res3</span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $MO</span></span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     Number Percent</span></span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; No change               16    57.1</span></span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Improve                 11    39.3</span></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Worsen                   1     3.6</span></span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total with problems     28    56.0</span></span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; No problems             22    44.0</span></span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $SC</span></span>
-<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     Number Percent</span></span>
-<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; No change               10    37.0</span></span>
-<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Improve                 14    51.9</span></span>
-<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Worsen                   3    11.1</span></span>
-<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total with problems     27    54.0</span></span>
-<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; No problems             23    46.0</span></span>
-<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $UA</span></span>
-<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     Number Percent</span></span>
-<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; No change               10      25</span></span>
-<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Improve                 26      65</span></span>
-<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Worsen                   4      10</span></span>
-<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total with problems     40      80</span></span>
-<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; No problems             10      20</span></span>
-<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $PD</span></span>
-<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     Number Percent</span></span>
-<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; No change               27    57.4</span></span>
-<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Improve                 19    40.4</span></span>
-<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Worsen                   1     2.1</span></span>
-<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total with problems     47    94.0</span></span>
-<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; No problems              3     6.0</span></span>
-<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $AD</span></span>
-<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     Number Percent</span></span>
-<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; No change                7    30.4</span></span>
-<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Improve                  9    39.1</span></span>
-<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Worsen                   7    30.4</span></span>
-<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total with problems     23    46.0</span></span>
-<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; No problems             27    54.0</span></span></code></pre></div>
+<p>The Paretian Classification of Health Change (PCHC) was developed by <a href="https://pubmed.ncbi.nlm.nih.gov/20623685">Devlin et al</a> in 2010 and is used to compare changes in individuals over time. PCHC classifies the change in an individual’s health state as better (improvement in at least one dimension), worse (a deterioration in at least one dimension), mixed (improvements and deteriorations in dimensions) or there being no change in the health state. Those classified in the No change group with the 11111 health state can be separated into their own “No problems” group. PCHC can be calculated using the <strong><em>pchc</em></strong> function.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">library</span>(readxl)</span>
+<span id="cb8-2"><a href="#cb8-2"></a></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="co">#load example data</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a>data &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;eq5d3l_example.xlsx&quot;</span>, <span class="dt">package=</span><span class="st">&quot;eq5d&quot;</span>))</span>
+<span id="cb8-5"><a href="#cb8-5"></a></span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="co">#use first 50 entries of each group as pre/post</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a>pre &lt;-<span class="st"> </span>data[data<span class="op">$</span>Group<span class="op">==</span><span class="st">&quot;Group1&quot;</span>,][<span class="dv">1</span><span class="op">:</span><span class="dv">50</span>,]</span>
+<span id="cb8-8"><a href="#cb8-8"></a>post &lt;-<span class="st"> </span>data[data<span class="op">$</span>Group<span class="op">==</span><span class="st">&quot;Group2&quot;</span>,][<span class="dv">1</span><span class="op">:</span><span class="dv">50</span>,]</span>
+<span id="cb8-9"><a href="#cb8-9"></a></span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="co">#run pchc function on data.frames</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a></span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="co">#Show no change, improve, worse, mixed without totals</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a>res1 &lt;-<span class="st"> </span><span class="kw">pchc</span>(pre, post, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">no.problems=</span><span class="ot">FALSE</span>, <span class="dt">totals=</span><span class="ot">FALSE</span>)</span>
+<span id="cb8-14"><a href="#cb8-14"></a>res1</span>
+<span id="cb8-15"><a href="#cb8-15"></a><span class="co">#&gt;              Number Percent</span></span>
+<span id="cb8-16"><a href="#cb8-16"></a><span class="co">#&gt; No change         5      10</span></span>
+<span id="cb8-17"><a href="#cb8-17"></a><span class="co">#&gt; Improve          32      64</span></span>
+<span id="cb8-18"><a href="#cb8-18"></a><span class="co">#&gt; Worsen           10      20</span></span>
+<span id="cb8-19"><a href="#cb8-19"></a><span class="co">#&gt; Mixed change      3       6</span></span>
+<span id="cb8-20"><a href="#cb8-20"></a></span>
+<span id="cb8-21"><a href="#cb8-21"></a><span class="co">#Show totals, but not those with no problems</span></span>
+<span id="cb8-22"><a href="#cb8-22"></a>res2 &lt;-<span class="st"> </span><span class="kw">pchc</span>(pre, post, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">no.problems=</span><span class="ot">FALSE</span>, <span class="dt">totals=</span><span class="ot">TRUE</span>)</span>
+<span id="cb8-23"><a href="#cb8-23"></a>res2</span>
+<span id="cb8-24"><a href="#cb8-24"></a><span class="co">#&gt;              Number Percent</span></span>
+<span id="cb8-25"><a href="#cb8-25"></a><span class="co">#&gt; No change         5      10</span></span>
+<span id="cb8-26"><a href="#cb8-26"></a><span class="co">#&gt; Improve          32      64</span></span>
+<span id="cb8-27"><a href="#cb8-27"></a><span class="co">#&gt; Worsen           10      20</span></span>
+<span id="cb8-28"><a href="#cb8-28"></a><span class="co">#&gt; Mixed change      3       6</span></span>
+<span id="cb8-29"><a href="#cb8-29"></a><span class="co">#&gt; Total            50     100</span></span>
+<span id="cb8-30"><a href="#cb8-30"></a></span>
+<span id="cb8-31"><a href="#cb8-31"></a><span class="co">#Show totals and no problems for each dimension</span></span>
+<span id="cb8-32"><a href="#cb8-32"></a>res3 &lt;-<span class="st"> </span><span class="kw">pchc</span>(pre, post, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">no.problems=</span><span class="ot">TRUE</span>, <span class="dt">totals=</span><span class="ot">TRUE</span>, <span class="dt">by.dimension=</span><span class="ot">TRUE</span>)</span>
+<span id="cb8-33"><a href="#cb8-33"></a>res3</span>
+<span id="cb8-34"><a href="#cb8-34"></a><span class="co">#&gt; $MO</span></span>
+<span id="cb8-35"><a href="#cb8-35"></a><span class="co">#&gt;                     Number Percent</span></span>
+<span id="cb8-36"><a href="#cb8-36"></a><span class="co">#&gt; No change               16    57.1</span></span>
+<span id="cb8-37"><a href="#cb8-37"></a><span class="co">#&gt; Improve                 11    39.3</span></span>
+<span id="cb8-38"><a href="#cb8-38"></a><span class="co">#&gt; Worsen                   1     3.6</span></span>
+<span id="cb8-39"><a href="#cb8-39"></a><span class="co">#&gt; Total with problems     28    56.0</span></span>
+<span id="cb8-40"><a href="#cb8-40"></a><span class="co">#&gt; No problems             22    44.0</span></span>
+<span id="cb8-41"><a href="#cb8-41"></a><span class="co">#&gt; </span></span>
+<span id="cb8-42"><a href="#cb8-42"></a><span class="co">#&gt; $SC</span></span>
+<span id="cb8-43"><a href="#cb8-43"></a><span class="co">#&gt;                     Number Percent</span></span>
+<span id="cb8-44"><a href="#cb8-44"></a><span class="co">#&gt; No change               10    37.0</span></span>
+<span id="cb8-45"><a href="#cb8-45"></a><span class="co">#&gt; Improve                 14    51.9</span></span>
+<span id="cb8-46"><a href="#cb8-46"></a><span class="co">#&gt; Worsen                   3    11.1</span></span>
+<span id="cb8-47"><a href="#cb8-47"></a><span class="co">#&gt; Total with problems     27    54.0</span></span>
+<span id="cb8-48"><a href="#cb8-48"></a><span class="co">#&gt; No problems             23    46.0</span></span>
+<span id="cb8-49"><a href="#cb8-49"></a><span class="co">#&gt; </span></span>
+<span id="cb8-50"><a href="#cb8-50"></a><span class="co">#&gt; $UA</span></span>
+<span id="cb8-51"><a href="#cb8-51"></a><span class="co">#&gt;                     Number Percent</span></span>
+<span id="cb8-52"><a href="#cb8-52"></a><span class="co">#&gt; No change               10      25</span></span>
+<span id="cb8-53"><a href="#cb8-53"></a><span class="co">#&gt; Improve                 26      65</span></span>
+<span id="cb8-54"><a href="#cb8-54"></a><span class="co">#&gt; Worsen                   4      10</span></span>
+<span id="cb8-55"><a href="#cb8-55"></a><span class="co">#&gt; Total with problems     40      80</span></span>
+<span id="cb8-56"><a href="#cb8-56"></a><span class="co">#&gt; No problems             10      20</span></span>
+<span id="cb8-57"><a href="#cb8-57"></a><span class="co">#&gt; </span></span>
+<span id="cb8-58"><a href="#cb8-58"></a><span class="co">#&gt; $PD</span></span>
+<span id="cb8-59"><a href="#cb8-59"></a><span class="co">#&gt;                     Number Percent</span></span>
+<span id="cb8-60"><a href="#cb8-60"></a><span class="co">#&gt; No change               27    57.4</span></span>
+<span id="cb8-61"><a href="#cb8-61"></a><span class="co">#&gt; Improve                 19    40.4</span></span>
+<span id="cb8-62"><a href="#cb8-62"></a><span class="co">#&gt; Worsen                   1     2.1</span></span>
+<span id="cb8-63"><a href="#cb8-63"></a><span class="co">#&gt; Total with problems     47    94.0</span></span>
+<span id="cb8-64"><a href="#cb8-64"></a><span class="co">#&gt; No problems              3     6.0</span></span>
+<span id="cb8-65"><a href="#cb8-65"></a><span class="co">#&gt; </span></span>
+<span id="cb8-66"><a href="#cb8-66"></a><span class="co">#&gt; $AD</span></span>
+<span id="cb8-67"><a href="#cb8-67"></a><span class="co">#&gt;                     Number Percent</span></span>
+<span id="cb8-68"><a href="#cb8-68"></a><span class="co">#&gt; No change                7    30.4</span></span>
+<span id="cb8-69"><a href="#cb8-69"></a><span class="co">#&gt; Improve                  9    39.1</span></span>
+<span id="cb8-70"><a href="#cb8-70"></a><span class="co">#&gt; Worsen                   7    30.4</span></span>
+<span id="cb8-71"><a href="#cb8-71"></a><span class="co">#&gt; Total with problems     23    46.0</span></span>
+<span id="cb8-72"><a href="#cb8-72"></a><span class="co">#&gt; No problems             27    54.0</span></span>
+<span id="cb8-73"><a href="#cb8-73"></a></span>
+<span id="cb8-74"><a href="#cb8-74"></a><span class="co">#Don&#39;t summarise. Return all classifications</span></span>
+<span id="cb8-75"><a href="#cb8-75"></a>res4 &lt;-<span class="st"> </span><span class="kw">pchc</span>(pre, post, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">no.problems=</span><span class="ot">TRUE</span>, <span class="dt">totals=</span><span class="ot">FALSE</span>, <span class="dt">summary=</span><span class="ot">FALSE</span>)</span>
+<span id="cb8-76"><a href="#cb8-76"></a><span class="kw">head</span>(res4)</span>
+<span id="cb8-77"><a href="#cb8-77"></a><span class="co">#&gt; [1] &quot;Improve&quot;      &quot;Improve&quot;      &quot;Improve&quot;      &quot;Improve&quot;      &quot;Improve&quot;     </span></span>
+<span id="cb8-78"><a href="#cb8-78"></a><span class="co">#&gt; [6] &quot;Mixed change&quot;</span></span></code></pre></div>
+</div>
+<div id="probability-of-superiority" class="section level3">
+<h3>Probability of Superiority</h3>
+<p>The Probability of Superiority (PS) is a non-parametric measure of effect size introduced by <a href="https://pubmed.ncbi.nlm.nih.gov/25355653/">Buchholz et al</a> in 2015 and enables the assessment of paired samples of EQ-5D profile data in the context of assessing changes in health in terms of improvement or deterioration. For each EQ-5D dimension the number of subjects that have improved over time is divided by the total number of matched pairs. Ties (those with no changes) were accounted for through the addition of half the number of ties to the numerator. The score is less than 0.5 if more patients deteriorate than improve, 0.5 if the same number of patients improve and deteriorate or do not change and greater than 0.5 if more patients improve than deteriorate.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw">library</span>(readxl)</span>
+<span id="cb9-2"><a href="#cb9-2"></a></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="co">#load example data</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a>data &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;eq5d3l_example.xlsx&quot;</span>, <span class="dt">package=</span><span class="st">&quot;eq5d&quot;</span>))</span>
+<span id="cb9-5"><a href="#cb9-5"></a></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="co">#use first 50 entries of each group as pre/post</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a>pre &lt;-<span class="st"> </span>data[data<span class="op">$</span>Group<span class="op">==</span><span class="st">&quot;Group1&quot;</span>,][<span class="dv">1</span><span class="op">:</span><span class="dv">50</span>,]</span>
+<span id="cb9-8"><a href="#cb9-8"></a>post &lt;-<span class="st"> </span>data[data<span class="op">$</span>Group<span class="op">==</span><span class="st">&quot;Group2&quot;</span>,][<span class="dv">1</span><span class="op">:</span><span class="dv">50</span>,]</span>
+<span id="cb9-9"><a href="#cb9-9"></a></span>
+<span id="cb9-10"><a href="#cb9-10"></a>res &lt;-<span class="st"> </span><span class="kw">ps</span>(pre, post, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>)</span>
+<span id="cb9-11"><a href="#cb9-11"></a>res</span>
+<span id="cb9-12"><a href="#cb9-12"></a><span class="co">#&gt; $MO</span></span>
+<span id="cb9-13"><a href="#cb9-13"></a><span class="co">#&gt; [1] 0.6</span></span>
+<span id="cb9-14"><a href="#cb9-14"></a><span class="co">#&gt; </span></span>
+<span id="cb9-15"><a href="#cb9-15"></a><span class="co">#&gt; $SC</span></span>
+<span id="cb9-16"><a href="#cb9-16"></a><span class="co">#&gt; [1] 0.61</span></span>
+<span id="cb9-17"><a href="#cb9-17"></a><span class="co">#&gt; </span></span>
+<span id="cb9-18"><a href="#cb9-18"></a><span class="co">#&gt; $UA</span></span>
+<span id="cb9-19"><a href="#cb9-19"></a><span class="co">#&gt; [1] 0.72</span></span>
+<span id="cb9-20"><a href="#cb9-20"></a><span class="co">#&gt; </span></span>
+<span id="cb9-21"><a href="#cb9-21"></a><span class="co">#&gt; $PD</span></span>
+<span id="cb9-22"><a href="#cb9-22"></a><span class="co">#&gt; [1] 0.68</span></span>
+<span id="cb9-23"><a href="#cb9-23"></a><span class="co">#&gt; </span></span>
+<span id="cb9-24"><a href="#cb9-24"></a><span class="co">#&gt; $AD</span></span>
+<span id="cb9-25"><a href="#cb9-25"></a><span class="co">#&gt; [1] 0.52</span></span></code></pre></div>
+</div>
+<div id="health-grid-profile" class="section level3">
+<h3>Health Grid Profile</h3>
+<p>The Health Grid Profile (HPG) was also introduced by <a href="https://pubmed.ncbi.nlm.nih.gov/20623685/">Devlin et al</a> in 2010. The HPG provides a visual way to observe changes in individuals between two time points. The HPG requires profiles for each time point to be ordered from best to worst. The <strong><em>hpg</em></strong> function uses a specified value set for this with profiles being assigned a ranking between 1 and 243 for EQ-5D-3L and 1 and 3125 for EQ-5D-5L based on severity (1 being the best and 243/3125 the worst). The rankings for the two time points for each individual are plotted with the location of each point showing whether there has been an improvement or deterioration. The further a point is above the 45° line, the great the improvement in an individuals health. Conversely, the further below the line a point is the more health has deteriorated. Those individuals on the line show “no change”.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="kw">library</span>(readxl)</span>
+<span id="cb10-2"><a href="#cb10-2"></a></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="co">#load example data</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a>data &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;eq5d3l_example.xlsx&quot;</span>, <span class="dt">package=</span><span class="st">&quot;eq5d&quot;</span>))</span>
+<span id="cb10-5"><a href="#cb10-5"></a></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="co">#use first 50 entries of each group as pre/post</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a>pre &lt;-<span class="st"> </span>data[data<span class="op">$</span>Group<span class="op">==</span><span class="st">&quot;Group1&quot;</span>,][<span class="dv">1</span><span class="op">:</span><span class="dv">50</span>,]</span>
+<span id="cb10-8"><a href="#cb10-8"></a>post &lt;-<span class="st"> </span>data[data<span class="op">$</span>Group<span class="op">==</span><span class="st">&quot;Group2&quot;</span>,][<span class="dv">1</span><span class="op">:</span><span class="dv">50</span>,]</span>
+<span id="cb10-9"><a href="#cb10-9"></a></span>
+<span id="cb10-10"><a href="#cb10-10"></a><span class="co">#run hpg function on data.frames</span></span>
+<span id="cb10-11"><a href="#cb10-11"></a></span>
+<span id="cb10-12"><a href="#cb10-12"></a><span class="co">#Show pre/post rankings and PCHC classification</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a>res &lt;-<span class="st"> </span><span class="kw">hpg</span>(pre, post, <span class="dt">country=</span><span class="st">&quot;UK&quot;</span>, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;TTO&quot;</span>)</span>
+<span id="cb10-14"><a href="#cb10-14"></a><span class="kw">head</span>(res)</span>
+<span id="cb10-15"><a href="#cb10-15"></a><span class="co">#&gt;   Pre Post         PCHC</span></span>
+<span id="cb10-16"><a href="#cb10-16"></a><span class="co">#&gt; 1  11    8      Improve</span></span>
+<span id="cb10-17"><a href="#cb10-17"></a><span class="co">#&gt; 2 161    8      Improve</span></span>
+<span id="cb10-18"><a href="#cb10-18"></a><span class="co">#&gt; 3  23    1      Improve</span></span>
+<span id="cb10-19"><a href="#cb10-19"></a><span class="co">#&gt; 4  20    1      Improve</span></span>
+<span id="cb10-20"><a href="#cb10-20"></a><span class="co">#&gt; 5  23    9      Improve</span></span>
+<span id="cb10-21"><a href="#cb10-21"></a><span class="co">#&gt; 6  33   97 Mixed change</span></span>
+<span id="cb10-22"><a href="#cb10-22"></a></span>
+<span id="cb10-23"><a href="#cb10-23"></a><span class="co">#Plot data using ggplot2</span></span>
+<span id="cb10-24"><a href="#cb10-24"></a><span class="kw">library</span>(ggplot2)</span>
+<span id="cb10-25"><a href="#cb10-25"></a></span>
+<span id="cb10-26"><a href="#cb10-26"></a><span class="kw">ggplot</span>(res, <span class="kw">aes</span>(Post, Pre, <span class="dt">color=</span>PCHC)) <span class="op">+</span></span>
+<span id="cb10-27"><a href="#cb10-27"></a><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">shape=</span>PCHC)) <span class="op">+</span></span>
+<span id="cb10-28"><a href="#cb10-28"></a><span class="st">  </span><span class="kw">coord_cartesian</span>(<span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">243</span>), <span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">243</span>)) <span class="op">+</span></span>
+<span id="cb10-29"><a href="#cb10-29"></a><span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">243</span>)) <span class="op">+</span></span>
+<span id="cb10-30"><a href="#cb10-30"></a><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">breaks=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">243</span>)) <span class="op">+</span></span>
+<span id="cb10-31"><a href="#cb10-31"></a><span class="st">  </span><span class="kw">annotate</span>(<span class="st">&quot;segment&quot;</span>, <span class="dt">x=</span><span class="dv">1</span>, <span class="dt">y=</span><span class="dv">1</span>, <span class="dt">xend=</span><span class="dv">243</span>, <span class="dt">yend=</span><span class="dv">243</span>, <span class="dt">colour=</span><span class="st">&quot;black&quot;</span>) <span class="op">+</span></span>
+<span id="cb10-32"><a href="#cb10-32"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">panel.border=</span><span class="kw">element_blank</span>(), <span class="dt">panel.grid.minor=</span><span class="kw">element_blank</span>()) <span class="op">+</span></span>
+<span id="cb10-33"><a href="#cb10-33"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Post-treatment&quot;</span>) <span class="op">+</span></span>
+<span id="cb10-34"><a href="#cb10-34"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Pre-treatment&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="shannons-indices" class="section level3">
+<h3>Shannon’s Indices</h3>
+<p>Shannon’s indices were first used to assess how evenly EQ-5D dimension scores or health states in a dataset are distributed by <a href="https://pubmed.ncbi.nlm.nih.gov/17294285/">Janssen et al</a> in 2007. Shannon’s H’ (diversity) index represents the absolute amount of informativity captured with Shannon’s J’ (evenness) index capturing the evenness of the distribution of data. Shannon’s J’ is calculated by dividing H’ by H’ max to give a value between 0 and 1. Lower values indicate more diversity and higher values indicate less.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">library</span>(readxl)</span>
+<span id="cb11-2"><a href="#cb11-2"></a></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="co">#load example data</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a>data &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;eq5d3l_example.xlsx&quot;</span>, <span class="dt">package=</span><span class="st">&quot;eq5d&quot;</span>))</span>
+<span id="cb11-5"><a href="#cb11-5"></a></span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="co">#Shannon&#39;s H&#39;, H&#39; max and J&#39; for the whole dataset</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="kw">shannon</span>(data, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">by.dimension=</span><span class="ot">FALSE</span>)</span>
+<span id="cb11-8"><a href="#cb11-8"></a><span class="co">#&gt; $H</span></span>
+<span id="cb11-9"><a href="#cb11-9"></a><span class="co">#&gt; [1] 4.17</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a><span class="co">#&gt; </span></span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="co">#&gt; $H.max</span></span>
+<span id="cb11-12"><a href="#cb11-12"></a><span class="co">#&gt; [1] 6.97</span></span>
+<span id="cb11-13"><a href="#cb11-13"></a><span class="co">#&gt; </span></span>
+<span id="cb11-14"><a href="#cb11-14"></a><span class="co">#&gt; $J</span></span>
+<span id="cb11-15"><a href="#cb11-15"></a><span class="co">#&gt; [1] 0.6</span></span>
+<span id="cb11-16"><a href="#cb11-16"></a></span>
+<span id="cb11-17"><a href="#cb11-17"></a><span class="co">#Shannon&#39;s H&#39;, H&#39; max and J&#39; for each dimension</span></span>
+<span id="cb11-18"><a href="#cb11-18"></a>res &lt;-<span class="st"> </span><span class="kw">shannon</span>(data, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">by.dimension=</span><span class="ot">TRUE</span>)</span>
+<span id="cb11-19"><a href="#cb11-19"></a></span>
+<span id="cb11-20"><a href="#cb11-20"></a><span class="co">#Convert to data.frame for ease of viewing</span></span>
+<span id="cb11-21"><a href="#cb11-21"></a><span class="kw">do.call</span>(rbind, res)</span>
+<span id="cb11-22"><a href="#cb11-22"></a><span class="co">#&gt;    H    H.max J   </span></span>
+<span id="cb11-23"><a href="#cb11-23"></a><span class="co">#&gt; MO 1    1.58  0.63</span></span>
+<span id="cb11-24"><a href="#cb11-24"></a><span class="co">#&gt; SC 0.97 1.58  0.61</span></span>
+<span id="cb11-25"><a href="#cb11-25"></a><span class="co">#&gt; UA 1.22 1.58  0.77</span></span>
+<span id="cb11-26"><a href="#cb11-26"></a><span class="co">#&gt; PD 1.13 1.58  0.71</span></span>
+<span id="cb11-27"><a href="#cb11-27"></a><span class="co">#&gt; AD 1.09 1.58  0.69</span></span></code></pre></div>
+</div>
+<div id="health-state-density-curve-and-health-state-density-index" class="section level3">
+<h3>Health State Density Curve and Health State Density Index</h3>
+<p>The Health State Density Curve (HSDC) was introduced by <a href="https://www.ohe.org/publications/new-methods-analysing-distribution-eq-5d-observations/">Zamora et al</a> in 2018 and provides a graphical way to depict the distribution of EQ-5D profiles. The cumulative frequency of health profiles ranked from most to least frequent is plotted against the cumulative proportion of the distinct health profiles (red line) and can be compared a uniform distribution representing total equality (black line). The Health State Density Index (HSDI) is based on the area formed by the diagonal line representing total equality and the line of the HSDC. The HSDI has a value between 0 and 1 where a value of 0 represents total inequality and 1 total equality.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="co">#load example data</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a>data &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;eq5d3l_example.xlsx&quot;</span>, <span class="dt">package=</span><span class="st">&quot;eq5d&quot;</span>))</span>
+<span id="cb12-3"><a href="#cb12-3"></a></span>
+<span id="cb12-4"><a href="#cb12-4"></a><span class="co">#Calculate HSDI</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a>hsdi &lt;-<span class="st"> </span><span class="kw">hsdi</span>(data, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>)</span>
+<span id="cb12-6"><a href="#cb12-6"></a></span>
+<span id="cb12-7"><a href="#cb12-7"></a><span class="co">#Plot HSDC</span></span>
+<span id="cb12-8"><a href="#cb12-8"></a>cf &lt;-<span class="st"> </span><span class="kw">eq5dcf</span>(data, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">proportions=</span>T)</span>
+<span id="cb12-9"><a href="#cb12-9"></a>cf<span class="op">$</span>CumulativeState &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(cf)<span class="op">/</span><span class="kw">nrow</span>(cf)</span>
+<span id="cb12-10"><a href="#cb12-10"></a></span>
+<span id="cb12-11"><a href="#cb12-11"></a><span class="co">#Plot data using ggplot2</span></span>
+<span id="cb12-12"><a href="#cb12-12"></a><span class="kw">library</span>(ggplot2)</span>
+<span id="cb12-13"><a href="#cb12-13"></a></span>
+<span id="cb12-14"><a href="#cb12-14"></a><span class="kw">ggplot</span>(cf, <span class="kw">aes</span>(CumulativeProp, CumulativeState)) <span class="op">+</span><span class="st"> </span></span>
+<span id="cb12-15"><a href="#cb12-15"></a><span class="st">  </span><span class="kw">geom_line</span>(<span class="dt">color=</span><span class="st">&quot;#FF9999&quot;</span>) <span class="op">+</span><span class="st"> </span></span>
+<span id="cb12-16"><a href="#cb12-16"></a><span class="st">  </span><span class="kw">annotate</span>(<span class="st">&quot;segment&quot;</span>, <span class="dt">x=</span><span class="dv">0</span>, <span class="dt">y=</span><span class="dv">0</span>, <span class="dt">xend=</span><span class="dv">1</span>, <span class="dt">yend=</span><span class="dv">1</span>, <span class="dt">colour=</span><span class="st">&quot;black&quot;</span>) <span class="op">+</span><span class="st">  </span></span>
+<span id="cb12-17"><a href="#cb12-17"></a><span class="st">  </span><span class="kw">annotate</span>(<span class="st">&quot;text&quot;</span>, <span class="dt">x=</span><span class="fl">0.5</span>, <span class="dt">y=</span><span class="fl">0.9</span>, <span class="dt">label=</span><span class="kw">paste0</span>(<span class="st">&quot;HSDI=&quot;</span>, hsdi)) <span class="op">+</span></span>
+<span id="cb12-18"><a href="#cb12-18"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">panel.border=</span><span class="kw">element_blank</span>(), <span class="dt">panel.grid.minor=</span><span class="kw">element_blank</span>()) <span class="op">+</span></span>
+<span id="cb12-19"><a href="#cb12-19"></a><span class="st">  </span><span class="kw">coord_cartesian</span>(<span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>)) <span class="op">+</span></span>
+<span id="cb12-20"><a href="#cb12-20"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Cumulative proportion of observations&quot;</span>) <span class="op">+</span></span>
+<span id="cb12-21"><a href="#cb12-21"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Cumulative proportion of profiles&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 <div id="eq-5d-ds" class="section level3">
 <h3>EQ-5D-DS</h3>
-<p>The <strong><em>eq5dds</em></strong> function is an R approximation
-of the Stata command written by <a href="https://www.stata-journal.com/article.html?article=st0450">Ramos-Goñi
-&amp; Ramallo-Fariña</a>. The function analyses and summarises the
-descriptive components of an EQ-5D dataset. The “by” argument enables a
-grouping variable to be specified when analysing the data subgroup.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>         <span class="fu">matrix</span>(</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>           <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span><span class="sc">*</span><span class="dv">12</span>, <span class="at">replace=</span><span class="cn">TRUE</span>),<span class="dv">12</span>,<span class="dv">5</span>, </span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">dimnames=</span><span class="fu">list</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>,<span class="fu">c</span>(<span class="st">&quot;MO&quot;</span>,<span class="st">&quot;SC&quot;</span>,<span class="st">&quot;UA&quot;</span>,<span class="st">&quot;PD&quot;</span>,<span class="st">&quot;AD&quot;</span>))</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>         ),</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">Sex=</span><span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;Male&quot;</span>, <span class="st">&quot;Female&quot;</span>))</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>       )</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5dds</span>(dat, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>)</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     MO   SC   UA   PD   AD</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 33.3 33.3 58.3 16.7 25.0</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 50.0 16.7  8.3 41.7 58.3</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 16.7 50.0 33.3 41.7 16.7</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5dds</span>(dat, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">counts=</span><span class="cn">TRUE</span>)</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   MO SC UA PD AD</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  4  4  7  2  3</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  6  2  1  5  7</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  2  6  4  5  2</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="fu">eq5dds</span>(dat, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">by=</span><span class="st">&quot;Sex&quot;</span>)</span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; data[, by]: Female</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     MO   SC UA   PD   AD</span></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 33.3 33.3 50 33.3 16.7</span></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 33.3 16.7  0 50.0 66.7</span></span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 33.3 50.0 50 16.7 16.7</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ------------------------------------------------------------ </span></span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; data[, by]: Male</span></span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     MO   SC   UA   PD   AD</span></span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 33.3 33.3 66.7  0.0 33.3</span></span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 66.7 16.7 16.7 33.3 50.0</span></span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  0.0 50.0 16.7 66.7 16.7</span></span></code></pre></div>
+<p>The <strong><em>eq5dds</em></strong> function is an R approximation of the Stata command written by <a href="https://www.stata-journal.com/article.html?article=st0450">Ramos-Goñi &amp; Ramallo-Fariña</a>. The function analyses and summarises the descriptive components of an EQ-5D dataset. The “by” argument enables a grouping variable to be specified when analysing the data subgroup.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>dat &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</span>
+<span id="cb13-2"><a href="#cb13-2"></a>         <span class="kw">matrix</span>(</span>
+<span id="cb13-3"><a href="#cb13-3"></a>           <span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">5</span><span class="op">*</span><span class="dv">12</span>, <span class="dt">replace=</span><span class="ot">TRUE</span>), <span class="dv">12</span>, <span class="dv">5</span>, </span>
+<span id="cb13-4"><a href="#cb13-4"></a>           <span class="dt">dimnames=</span><span class="kw">list</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">12</span>, <span class="kw">c</span>(<span class="st">&quot;MO&quot;</span>,<span class="st">&quot;SC&quot;</span>,<span class="st">&quot;UA&quot;</span>,<span class="st">&quot;PD&quot;</span>,<span class="st">&quot;AD&quot;</span>))</span>
+<span id="cb13-5"><a href="#cb13-5"></a>         ),</span>
+<span id="cb13-6"><a href="#cb13-6"></a>         <span class="dt">Sex=</span><span class="kw">rep</span>(<span class="kw">c</span>(<span class="st">&quot;Male&quot;</span>, <span class="st">&quot;Female&quot;</span>))</span>
+<span id="cb13-7"><a href="#cb13-7"></a>       )</span>
+<span id="cb13-8"><a href="#cb13-8"></a></span>
+<span id="cb13-9"><a href="#cb13-9"></a><span class="kw">eq5dds</span>(dat, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>)</span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="co">#&gt;     MO   SC   UA   PD   AD</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a><span class="co">#&gt; 1 33.3 41.7 75.0 25.0 66.7</span></span>
+<span id="cb13-12"><a href="#cb13-12"></a><span class="co">#&gt; 2  8.3 16.7 16.7 41.7 16.7</span></span>
+<span id="cb13-13"><a href="#cb13-13"></a><span class="co">#&gt; 3 58.3 41.7  8.3 33.3 16.7</span></span>
+<span id="cb13-14"><a href="#cb13-14"></a></span>
+<span id="cb13-15"><a href="#cb13-15"></a><span class="kw">eq5dds</span>(dat, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">counts=</span><span class="ot">TRUE</span>)</span>
+<span id="cb13-16"><a href="#cb13-16"></a><span class="co">#&gt;   MO SC UA PD AD</span></span>
+<span id="cb13-17"><a href="#cb13-17"></a><span class="co">#&gt; 1  4  5  9  3  8</span></span>
+<span id="cb13-18"><a href="#cb13-18"></a><span class="co">#&gt; 2  1  2  2  5  2</span></span>
+<span id="cb13-19"><a href="#cb13-19"></a><span class="co">#&gt; 3  7  5  1  4  2</span></span>
+<span id="cb13-20"><a href="#cb13-20"></a></span>
+<span id="cb13-21"><a href="#cb13-21"></a><span class="kw">eq5dds</span>(dat, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">by=</span><span class="st">&quot;Sex&quot;</span>)</span>
+<span id="cb13-22"><a href="#cb13-22"></a><span class="co">#&gt; data[, by]: Female</span></span>
+<span id="cb13-23"><a href="#cb13-23"></a><span class="co">#&gt;     MO   SC   UA   PD   AD</span></span>
+<span id="cb13-24"><a href="#cb13-24"></a><span class="co">#&gt; 1 33.3 66.7 66.7 16.7 83.3</span></span>
+<span id="cb13-25"><a href="#cb13-25"></a><span class="co">#&gt; 2  0.0 16.7 33.3 50.0  0.0</span></span>
+<span id="cb13-26"><a href="#cb13-26"></a><span class="co">#&gt; 3 66.7 16.7  0.0 33.3 16.7</span></span>
+<span id="cb13-27"><a href="#cb13-27"></a><span class="co">#&gt; ------------------------------------------------------------ </span></span>
+<span id="cb13-28"><a href="#cb13-28"></a><span class="co">#&gt; data[, by]: Male</span></span>
+<span id="cb13-29"><a href="#cb13-29"></a><span class="co">#&gt;     MO   SC   UA   PD   AD</span></span>
+<span id="cb13-30"><a href="#cb13-30"></a><span class="co">#&gt; 1 33.3 16.7 83.3 33.3 50.0</span></span>
+<span id="cb13-31"><a href="#cb13-31"></a><span class="co">#&gt; 2 16.7 16.7  0.0 33.3 33.3</span></span>
+<span id="cb13-32"><a href="#cb13-32"></a><span class="co">#&gt; 3 50.0 66.7 16.7 33.3 16.7</span></span></code></pre></div>
 </div>
 </div>
 <div id="helper-functions" class="section level2">
 <h2>Helper functions</h2>
-<p>Helper functions are included, which may be useful in the processing
-of EQ-5D data. <strong><em>getHealthStates</em></strong> returns a
-vector of all possible five digit health states for a specified EQ-5D
-version. <strong><em>getDimensionsFromHealthStates</em></strong> splits
-a vector of five digit health states into a data.frame of their
-individual components and
-<strong><em>getHealthStatesFromDimensions</em></strong> combines
-indiviual dimensions in a data.frame into five digit health states.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Get all EQ-5D-3L five digit health states (top 6 returned for brevity).</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">getHealthStates</span>(<span class="st">&quot;3L&quot;</span>))</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;11111&quot; &quot;11112&quot; &quot;11113&quot; &quot;11121&quot; &quot;11122&quot; &quot;11123&quot;</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Split five digit health states into their individual components.</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">getDimensionsFromHealthStates</span>(<span class="fu">c</span>(<span class="st">&quot;12345&quot;</span>, <span class="st">&quot;54321&quot;</span>), <span class="at">version=</span><span class="st">&quot;5L&quot;</span>)</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   MO SC UA PD AD</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  1  2  3  4  5</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  5  4  3  2  1</span></span></code></pre></div>
+<p>Helper functions are included, which may be useful in the processing of EQ-5D data. <strong><em>getHealthStates</em></strong> returns a vector of all possible five digit health states for a specified EQ-5D version. <strong><em>getDimensionsFromHealthStates</em></strong> splits a vector of five digit health states into a data.frame of their individual components and <strong><em>getHealthStatesFromDimensions</em></strong> combines indiviual dimensions in a data.frame into five digit health states.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a></span>
+<span id="cb14-2"><a href="#cb14-2"></a><span class="co"># Get all EQ-5D-3L five digit health states (top 6 returned for brevity).</span></span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="kw">head</span>(<span class="kw">getHealthStates</span>(<span class="st">&quot;3L&quot;</span>))</span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="co">#&gt; [1] &quot;11111&quot; &quot;11112&quot; &quot;11113&quot; &quot;11121&quot; &quot;11122&quot; &quot;11123&quot;</span></span>
+<span id="cb14-5"><a href="#cb14-5"></a></span>
+<span id="cb14-6"><a href="#cb14-6"></a><span class="co"># Split five digit health states into their individual components.</span></span>
+<span id="cb14-7"><a href="#cb14-7"></a><span class="kw">getDimensionsFromHealthStates</span>(<span class="kw">c</span>(<span class="st">&quot;12345&quot;</span>, <span class="st">&quot;54321&quot;</span>), <span class="dt">version=</span><span class="st">&quot;5L&quot;</span>)</span>
+<span id="cb14-8"><a href="#cb14-8"></a><span class="co">#&gt;   MO SC UA PD AD</span></span>
+<span id="cb14-9"><a href="#cb14-9"></a><span class="co">#&gt; 1  1  2  3  4  5</span></span>
+<span id="cb14-10"><a href="#cb14-10"></a><span class="co">#&gt; 2  5  4  3  2  1</span></span></code></pre></div>
 </div>
 <div id="example-data" class="section level2">
 <h2>Example data</h2>
-<p>Example data is included with the package and can be accessed using
-the <strong><em>system.file</em></strong> function.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># View example files.</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dir</span>(<span class="at">path=</span><span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="at">package=</span><span class="st">&quot;eq5d&quot;</span>))</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;eq5d3l_example.xlsx&quot;            &quot;eq5d3l_five_digit_example.xlsx&quot;</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3] &quot;eq5d5l_example.xlsx&quot;</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Read example EQ-5D-3L data.</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;eq5d3l_example.xlsx&quot;</span>, <span class="at">package=</span><span class="st">&quot;eq5d&quot;</span>))</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate index scores</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>scores <span class="ot">&lt;-</span> <span class="fu">eq5d</span>(data, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;TTO&quot;</span>)</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Top 6 scores</span></span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(scores)</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1]  0.760  0.796 -0.003  0.796  0.656  1.000</span></span></code></pre></div>
+<p>Example data is included with the package and can be accessed using the <strong><em>system.file</em></strong> function.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="co"># View example files.</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="kw">dir</span>(<span class="dt">path=</span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="dt">package=</span><span class="st">&quot;eq5d&quot;</span>))</span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="co">#&gt; [1] &quot;eq5d3l_example.csv&quot;             &quot;eq5d3l_example.xlsx&quot;           </span></span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="co">#&gt; [3] &quot;eq5d3l_five_digit_example.csv&quot;  &quot;eq5d3l_five_digit_example.xlsx&quot;</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a><span class="co">#&gt; [5] &quot;eq5d5l_example.csv&quot;             &quot;eq5d5l_example.xlsx&quot;</span></span>
+<span id="cb15-6"><a href="#cb15-6"></a></span>
+<span id="cb15-7"><a href="#cb15-7"></a><span class="co"># Read example EQ-5D-3L data.</span></span>
+<span id="cb15-8"><a href="#cb15-8"></a><span class="kw">library</span>(readxl)</span>
+<span id="cb15-9"><a href="#cb15-9"></a>data &lt;-<span class="st"> </span><span class="kw">read_excel</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;eq5d3l_example.xlsx&quot;</span>, <span class="dt">package=</span><span class="st">&quot;eq5d&quot;</span>))</span>
+<span id="cb15-10"><a href="#cb15-10"></a></span>
+<span id="cb15-11"><a href="#cb15-11"></a><span class="co"># Calculate index scores</span></span>
+<span id="cb15-12"><a href="#cb15-12"></a>scores &lt;-<span class="st"> </span><span class="kw">eq5d</span>(data, <span class="dt">country=</span><span class="st">&quot;UK&quot;</span>, <span class="dt">version=</span><span class="st">&quot;3L&quot;</span>, <span class="dt">type=</span><span class="st">&quot;TTO&quot;</span>)</span>
+<span id="cb15-13"><a href="#cb15-13"></a></span>
+<span id="cb15-14"><a href="#cb15-14"></a><span class="co"># Top 6 scores</span></span>
+<span id="cb15-15"><a href="#cb15-15"></a><span class="kw">head</span>(scores)</span>
+<span id="cb15-16"><a href="#cb15-16"></a><span class="co">#&gt; [1]  0.760  0.796 -0.003  0.796  0.656  1.000</span></span></code></pre></div>
 </div>
 <div id="shiny-web-interface" class="section level2">
 <h2>Shiny web interface</h2>
-<p>The calculation (and visualisation) of multiple EQ-5D indices can
-also be performed by upload of a CSV or Excel file using the packaged <a href="https://shiny.rstudio.com">Shiny</a> app. This requires the <a href="https://cran.r-project.org/package=shiny">shiny</a>, <a href="https://cran.r-project.org/package=DT">DT</a>, <a href="https://cran.r-project.org/package=FSA">FSA</a>, <a href="https://cran.r-project.org/package=ggplot2">ggplot2</a>, <a href="https://cran.r-project.org/package=ggiraph">ggiraph</a>, <a href="https://cran.r-project.org/package=ggiraphExtra">ggiraphExtra</a>,
-<a href="https://cran.r-project.org/package=mime">mime</a>, <a href="https://cran.r-project.org/package=PMCMRplus">PMCMRplus</a>, <a href="https://cran.r-project.org/package=readxl">readxl</a>, <a href="https://cran.r-project.org/package=shinycssloaders">shinycssloaders</a>
-and <a href="https://cran.r-project.org/package=shinyWidgets">shinyWidgets</a>
-packages. Ideally the CSV/Excel headers should be the same as the names
-of the vector passed to the <strong><em>eq5d</em></strong> function
-i.e. MO, SC, UA, PD and AD or the column name “State” if using the five
-digit format. However, a modal dialog will prompt the user to select the
-appropriate columns if the defaults can not be found.</p>
-<p>The app is launched using the <strong><em>shiny_eq5d</em></strong>
-function.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">shiny_eq5d</span>()</span></code></pre></div>
-<p>Alternatively, it can be accessed without installing R/Shiny/eq5d by
-visiting <a href="https://fragla.shinyapps.io/shiny-eq5d">shinyapps.io</a>.</p>
+<p>The calculation (and visualisation) of multiple EQ-5D indices can also be performed by upload of a CSV or Excel file using the packaged <a href="https://shiny.rstudio.com">Shiny</a> app. This requires the <a href="https://cran.r-project.org/package=shiny">shiny</a>, <a href="https://cran.r-project.org/package=DT">DT</a>, <a href="https://cran.r-project.org/package=FSA">FSA</a>, <a href="https://cran.r-project.org/package=ggplot2">ggplot2</a>, <a href="https://cran.r-project.org/package=ggiraph">ggiraph</a>, <a href="https://cran.r-project.org/package=ggiraphExtra">ggiraphExtra</a>, <a href="https://cran.r-project.org/package=mime">mime</a>, <a href="https://cran.r-project.org/package=PMCMRplus">PMCMRplus</a>, <a href="https://cran.r-project.org/package=readxl">readxl</a>, <a href="https://cran.r-project.org/package=shinycssloaders">shinycssloaders</a> and <a href="https://cran.r-project.org/package=shinyWidgets">shinyWidgets</a> packages. Ideally the CSV/Excel headers should be the same as the names of the vector passed to the <strong><em>eq5d</em></strong> function i.e. MO, SC, UA, PD and AD or the column name “State” if using the five digit format. However, a modal dialog will prompt the user to select the appropriate columns if the defaults can not be found. Both files below will produce the same results.</p>
+<p>The app is launched using the <strong><em>shiny_eq5d</em></strong> function.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="kw">shiny_eq5d</span>()</span></code></pre></div>
+<p>Alternatively, it can be accessed without installing R/Shiny/eq5d by visiting <a href="https://fragla.shinyapps.io/shiny-eq5d">shinyapps.io</a>.</p>
 </div>
 <div id="license" class="section level2">
 <h2>License</h2>
-<p>This project is licensed under the MIT License - see the <a href="https://github.com/fragla/eq5d/blob/master/LICENSE.md">LICENSE.md</a>
-file for details.</p>
+<p>This project is licensed under the MIT License - see the <a href="https://github.com/fragla/eq5d/blob/master/LICENSE.md">LICENSE.md</a> file for details.</p>
 </div>
 </div>
 

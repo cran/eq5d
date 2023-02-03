@@ -1,5 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
 <!-- badges: start -->
 
 [![R build
@@ -151,7 +152,7 @@ eq5d(scores.df, country="Canada", version="5L", type="VT")
 #> [1] 0.949 0.362 0.390 0.524 0.431
 
 #data.frame using five digit format
-scores.df2 <- data.frame(state=c(11111,25532,34241,43332,52141))
+scores.df2 <- data.frame(state=c(11111, 25532, 34241, 43332, 52141))
 
 eq5d(scores.df2, country="Canada", version="5L", type="VT", five.digit="state")
 #> [1] 0.949 0.362 0.390 0.524 0.431
@@ -170,7 +171,7 @@ or by country.
 
 ``` r
 # Return TTO value sets with PubMed IDs and DOIs (top 6 returned for brevity).
-head(valuesets(type="TTO", references=c("PubMed", "DOI")))
+head(valuesets(type="TTO", references=c("PubMed","DOI")))
 #>    Version Type   Country   PubMed                              DOI
 #> 1 EQ-5D-3L  TTO Argentina 19900257 10.1111/j.1524-4733.2008.00468.x
 #> 2 EQ-5D-3L  TTO Australia 21914515       10.1016/j.jval.2011.04.009
@@ -180,7 +181,7 @@ head(valuesets(type="TTO", references=c("PubMed", "DOI")))
 #> 6 EQ-5D-3L  TTO     China 25128053       10.1016/j.jval.2014.05.007
 
 # Return VAS value sets with ISBN and external URL (top 6 returned for brevity).
-head(valuesets(type="VAS", references=c("ISBN", "ExternalURL")))
+head(valuesets(type="VAS", references=c("ISBN","ExternalURL")))
 #>    Version Type Country          ISBN
 #> 1 EQ-5D-3L  VAS Belgium 1-4020-5511-0
 #> 2 EQ-5D-3L  VAS Denmark 1-4020-5511-1
@@ -283,7 +284,7 @@ lss(c(MO=1,SC=2,UA=3,PD=2,AD=1), version="3L")
 lss(55555, version="5L")
 #> [1] 25
 
-lss(c(11111,12345, 55555), version="5L")
+lss(c(11111, 12345, 55555), version="5L")
 #> [1]  5 15 25
 ```
 
@@ -303,7 +304,7 @@ lfs(c(MO=1,SC=2,UA=3,PD=2,AD=1), version="3L")
 lfs(55555, version="5L")
 #> [1] "00005"
 
-lfs(c(11111,12345, 55555), version="5L")
+lfs(c(11111, 12345, 55555), version="5L")
 #> [1] "50000" "11111" "00005"
 ```
 
@@ -392,7 +393,192 @@ res3
 #> Worsen                   7    30.4
 #> Total with problems     23    46.0
 #> No problems             27    54.0
+
+#Don't summarise. Return all classifications
+res4 <- pchc(pre, post, version="3L", no.problems=TRUE, totals=FALSE, summary=FALSE)
+head(res4)
+#> [1] "Improve"      "Improve"      "Improve"      "Improve"      "Improve"     
+#> [6] "Mixed change"
 ```
+
+### Probability of Superiority
+
+The Probability of Superiority (PS) is a non-parametric measure of
+effect size introduced by [Buchholz et
+al](https://pubmed.ncbi.nlm.nih.gov/25355653/) in 2015 and enables the
+assessment of paired samples of EQ-5D profile data in the context of
+assessing changes in health in terms of improvement or deterioration.
+For each EQ-5D dimension the number of subjects that have improved over
+time is divided by the total number of matched pairs. Ties (those with
+no changes) were accounted for through the addition of half the number
+of ties to the numerator. The score is less than 0.5 if more patients
+deteriorate than improve, 0.5 if the same number of patients improve and
+deteriorate or do not change and greater than 0.5 if more patients
+improve than deteriorate.
+
+``` r
+library(readxl)
+
+#load example data
+data <- read_excel(system.file("extdata", "eq5d3l_example.xlsx", package="eq5d"))
+
+#use first 50 entries of each group as pre/post
+pre <- data[data$Group=="Group1",][1:50,]
+post <- data[data$Group=="Group2",][1:50,]
+
+res <- ps(pre, post, version="3L")
+res
+#> $MO
+#> [1] 0.6
+#> 
+#> $SC
+#> [1] 0.61
+#> 
+#> $UA
+#> [1] 0.72
+#> 
+#> $PD
+#> [1] 0.68
+#> 
+#> $AD
+#> [1] 0.52
+```
+
+### Health Grid Profile
+
+The Health Grid Profile (HPG) was also introduced by [Devlin et
+al](https://pubmed.ncbi.nlm.nih.gov/20623685/) in 2010. The HPG provides
+a visual way to observe changes in individuals between two time points.
+The HPG requires profiles for each time point to be ordered from best to
+worst. The ***hpg*** function uses a specified value set for this with
+profiles being assigned a ranking between 1 and 243 for EQ-5D-3L and 1
+and 3125 for EQ-5D-5L based on severity (1 being the best and 243/3125
+the worst). The rankings for the two time points for each individual are
+plotted with the location of each point showing whether there has been
+an improvement or deterioration. The further a point is above the 45°
+line, the great the improvement in an individuals health. Conversely,
+the further below the line a point is the more health has deteriorated.
+Those individuals on the line show “no change”.
+
+``` r
+library(readxl)
+
+#load example data
+data <- read_excel(system.file("extdata", "eq5d3l_example.xlsx", package="eq5d"))
+
+#use first 50 entries of each group as pre/post
+pre <- data[data$Group=="Group1",][1:50,]
+post <- data[data$Group=="Group2",][1:50,]
+
+#run hpg function on data.frames
+
+#Show pre/post rankings and PCHC classification
+res <- hpg(pre, post, country="UK", version="3L", type="TTO")
+head(res)
+#>   Pre Post         PCHC
+#> 1  11    8      Improve
+#> 2 161    8      Improve
+#> 3  23    1      Improve
+#> 4  20    1      Improve
+#> 5  23    9      Improve
+#> 6  33   97 Mixed change
+
+#Plot data using ggplot2
+library(ggplot2)
+
+ggplot(res, aes(Post, Pre, color=PCHC)) +
+  geom_point(aes(shape=PCHC)) +
+  coord_cartesian(xlim=c(1,243), ylim=c(1,243)) +
+  scale_x_continuous(breaks=c(1,243)) +
+  scale_y_continuous(breaks=c(1,243)) +
+  annotate("segment", x=1, y=1, xend=243, yend=243, colour="black") +
+  theme(panel.border=element_blank(), panel.grid.minor=element_blank()) +
+  xlab("Post-treatment") +
+  ylab("Pre-treatment")
+```
+
+<img src="man/figures/README-hpg-1.png" width="100%" />
+
+### Shannon’s Indices
+
+Shannon’s indices were first used to assess how evenly EQ-5D dimension
+scores or health states in a dataset are distributed by [Janssen et
+al](https://pubmed.ncbi.nlm.nih.gov/17294285/) in 2007. Shannon’s H’
+(diversity) index represents the absolute amount of informativity
+captured with Shannon’s J’ (evenness) index capturing the evenness of
+the distribution of data. Shannon’s J’ is calculated by dividing H’ by
+H’ max to give a value between 0 and 1. Lower values indicate more
+diversity and higher values indicate less.
+
+``` r
+library(readxl)
+
+#load example data
+data <- read_excel(system.file("extdata", "eq5d3l_example.xlsx", package="eq5d"))
+
+#Shannon's H', H' max and J' for the whole dataset
+shannon(data, version="3L", by.dimension=FALSE)
+#> $H
+#> [1] 4.17
+#> 
+#> $H.max
+#> [1] 6.97
+#> 
+#> $J
+#> [1] 0.6
+
+#Shannon's H', H' max and J' for each dimension
+res <- shannon(data, version="3L", by.dimension=TRUE)
+
+#Convert to data.frame for ease of viewing
+do.call(rbind, res)
+#>    H    H.max J   
+#> MO 1    1.58  0.63
+#> SC 0.97 1.58  0.61
+#> UA 1.22 1.58  0.77
+#> PD 1.13 1.58  0.71
+#> AD 1.09 1.58  0.69
+```
+
+### Health State Density Curve and Health State Density Index
+
+The Health State Density Curve (HSDC) was introduced by [Zamora et
+al](https://www.ohe.org/publications/new-methods-analysing-distribution-eq-5d-observations/)
+in 2018 and provides a graphical way to depict the distribution of EQ-5D
+profiles. The cumulative frequency of health profiles ranked from most
+to least frequent is plotted against the cumulative proportion of the
+distinct health profiles (red line) and can be compared a uniform
+distribution representing total equality (black line). The Health State
+Density Index (HSDI) is based on the area formed by the diagonal line
+representing total equality and the line of the HSDC. The HSDI has a
+value between 0 and 1 where a value of 0 represents total inequality and
+1 total equality.
+
+``` r
+#load example data
+data <- read_excel(system.file("extdata", "eq5d3l_example.xlsx", package="eq5d"))
+
+#Calculate HSDI
+hsdi <- hsdi(data, version="3L")
+
+#Plot HSDC
+cf <- eq5dcf(data, version="3L", proportions=T)
+cf$CumulativeState <- 1:nrow(cf)/nrow(cf)
+
+#Plot data using ggplot2
+library(ggplot2)
+
+ggplot(cf, aes(CumulativeProp, CumulativeState)) + 
+  geom_line(color="#FF9999") + 
+  annotate("segment", x=0, y=0, xend=1, yend=1, colour="black") +  
+  annotate("text", x=0.5, y=0.9, label=paste0("HSDI=", hsdi)) +
+  theme(panel.border=element_blank(), panel.grid.minor=element_blank()) +
+  coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
+  xlab("Cumulative proportion of observations") +
+  ylab("Cumulative proportion of profiles")
+```
+
+<img src="man/figures/README-hsdi-1.png" width="100%" />
 
 ### EQ-5D-DS
 
@@ -404,39 +590,38 @@ EQ-5D dataset. The “by” argument enables a grouping variable to be
 specified when analysing the data subgroup.
 
 ``` r
-
 dat <- data.frame(
          matrix(
-           sample(1:3,5*12, replace=TRUE),12,5, 
-           dimnames=list(1:12,c("MO","SC","UA","PD","AD"))
+           sample(1:3, 5*12, replace=TRUE), 12, 5, 
+           dimnames=list(1:12, c("MO","SC","UA","PD","AD"))
          ),
          Sex=rep(c("Male", "Female"))
        )
 
 eq5dds(dat, version="3L")
 #>     MO   SC   UA   PD   AD
-#> 1 25.0 33.3 16.7 33.3 41.7
-#> 2 33.3 41.7 33.3 33.3 16.7
-#> 3 41.7 25.0 50.0 33.3 41.7
+#> 1 66.7 41.7 33.3 25.0 41.7
+#> 2 16.7 16.7 41.7 41.7 33.3
+#> 3 16.7 41.7 25.0 33.3 25.0
 
 eq5dds(dat, version="3L", counts=TRUE)
 #>   MO SC UA PD AD
-#> 1  3  4  2  4  5
-#> 2  4  5  4  4  2
-#> 3  5  3  6  4  5
+#> 1  8  5  4  3  5
+#> 2  2  2  5  5  4
+#> 3  2  5  3  4  3
 
 eq5dds(dat, version="3L", by="Sex")
 #> data[, by]: Female
-#>     MO SC   UA   PD   AD
-#> 1  0.0  0 16.7 16.7 50.0
-#> 2 66.7 50 33.3 33.3 16.7
-#> 3 33.3 50 50.0 50.0 33.3
+#>     MO   SC   UA PD   AD
+#> 1 50.0 66.7 33.3  0 33.3
+#> 2 33.3 33.3 50.0 50 33.3
+#> 3 16.7  0.0 16.7 50 33.3
 #> ------------------------------------------------------------ 
 #> data[, by]: Male
-#>   MO   SC   UA   PD   AD
-#> 1 50 66.7 16.7 50.0 33.3
-#> 2  0 33.3 33.3 33.3 16.7
-#> 3 50  0.0 50.0 16.7 50.0
+#>     MO   SC   UA   PD   AD
+#> 1 83.3 16.7 33.3 50.0 50.0
+#> 2  0.0  0.0 33.3 33.3 33.3
+#> 3 16.7 83.3 33.3 16.7 16.7
 ```
 
 ## Helper functions
@@ -470,8 +655,9 @@ Example data is included with the package and can be accessed using the
 ``` r
 # View example files.
 dir(path=system.file("extdata", package="eq5d"))
-#> [1] "eq5d3l_example.xlsx"            "eq5d3l_five_digit_example.xlsx"
-#> [3] "eq5d5l_example.xlsx"
+#> [1] "eq5d3l_example.csv"             "eq5d3l_example.xlsx"           
+#> [3] "eq5d3l_five_digit_example.csv"  "eq5d3l_five_digit_example.xlsx"
+#> [5] "eq5d5l_example.csv"             "eq5d5l_example.xlsx"
 
 # Read example EQ-5D-3L data.
 library(readxl)
@@ -511,7 +697,7 @@ results.
 ![Shiny EQ-5D app excel data
 formats](man/figures/shiny_app_excel_scores.png)
 
-The app is launched using the ***shiny_eq5d*** function.
+The app is launched using the ***shiny\_eq5d*** function.
 
 ``` r
 shiny_eq5d()

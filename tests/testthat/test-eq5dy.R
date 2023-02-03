@@ -8,6 +8,13 @@ test_that("EQ-5D-Y Belgium gives correct answer", {
   expect_equal(eq5dy(c(MO=3,SC=3,UA=3,PD=3,AD=3), "Belgium"), -0.475)
 })
 
+test_that("EQ-5D-Y China gives correct answer", {
+  expect_equal(eq5dy(c(MO=1,SC=1,UA=1,PD=1,AD=1), "China"), 1)
+  expect_equal(eq5dy(c(MO=1,SC=2,UA=1,PD=1,AD=1), "China"), 0.977)
+  expect_equal(eq5dy(c(MO=2,SC=2,UA=2,PD=2,AD=2), "China"), 0.742)
+  expect_equal(eq5dy(c(MO=3,SC=3,UA=3,PD=3,AD=3), "China"), -0.089)
+})
+
 test_that("EQ-5D-Y Germany gives correct answer", {
   expect_equal(eq5dy(c(MO=1,SC=1,UA=1,PD=1,AD=1), "Germany"), 1)
   expect_equal(eq5dy(c(MO=2,SC=1,UA=1,PD=1,AD=1), "Germany"), 0.976)
@@ -21,6 +28,13 @@ test_that("EQ-5D-Y Hungary gives correct answer", {
   expect_equal(eq5dy(c(MO=1,SC=2,UA=3,PD=2,AD=1), "Hungary"), 0.577)
   expect_equal(eq5dy(c(MO=2,SC=2,UA=2,PD=2,AD=2), "Hungary"), 0.614)
   expect_equal(eq5dy(c(MO=3,SC=3,UA=3,PD=3,AD=3), "Hungary"), -0.485)
+})
+
+test_that("EQ-5D-Y Indonesia gives correct answer", {
+  expect_equal(eq5dy(c(MO=1,SC=1,UA=1,PD=1,AD=1), "Indonesia"), 1)
+  expect_equal(eq5dy(c(MO=1,SC=2,UA=3,PD=1,AD=2), "Indonesia"), 0.791)
+  expect_equal(eq5dy(c(MO=2,SC=2,UA=2,PD=2,AD=2), "Indonesia"), 0.583)
+  expect_equal(eq5dy(c(MO=3,SC=3,UA=3,PD=3,AD=3), "Indonesia"), -0.086)
 })
 
 test_that("EQ-5D-Y Japan gives correct answer", {
