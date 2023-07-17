@@ -217,6 +217,7 @@ ggplot(cf, aes(CumulativeProp, CumulativeState)) +
 
 
 ## ----eq5dds-------------------------------------------------------------------
+set.seed(12345)
 dat <- data.frame(
          matrix(
            sample(1:3, 5*12, replace=TRUE), 12, 5, 

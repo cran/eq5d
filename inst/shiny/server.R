@@ -151,10 +151,6 @@ shinyServer(function(input, output, session) {
   output$include_raw_data <- renderUI({
     checkboxInput("raw", "Include all submitted data in table", TRUE)
   })
-  
-  output$include_raw_data <- renderUI({
-    checkboxInput("raw", "Include all submitted data in table", TRUE)
-  })
 
   getPaired <- reactive({
     data <- getTableDataByGroup()
@@ -560,7 +556,7 @@ shinyServer(function(input, output, session) {
     }
     colnames(res)[ncol(res)] <- "Index"
 
-    if(all(getDimensionNames() %in% colnames(rawdata()))) {
+    if(all(getDimensionNames() %in% colnames(dataset()))) {
       if("lss" %in% input$severity_scores) {
         res$LSS <- lss(dataset(), version=input$version, ignore.invalid=ignoreInvalid(), dimensions=getDimensionNames())
       }
@@ -579,6 +575,7 @@ shinyServer(function(input, output, session) {
     
     if(!is.null(input$group) && input$group != "None") {
       data <- data[which(data[,input$group] %in% input$group_member),]
+      data[[input$group]] <- factor(data[[input$group]], levels=unique(data[[input$group]]))
     }
     
     return(data)
@@ -589,7 +586,7 @@ shinyServer(function(input, output, session) {
     return(ignore.invalid)
   })
 
-  output$plot <- renderggiraph({
+  output$plot <- renderGirafe({
     if(is.null(input$data) || is.null(input$plot_type) || is.null(input$group))
       return()
     
@@ -601,7 +598,9 @@ shinyServer(function(input, output, session) {
 
     code <- getPlot()
 
-    output <- ggiraph(code = print(code), selection_type = "single")
+    #output <- ggiraph(code = print(code), selection_type = "single")
+    output <- girafe(ggobj = code)
+    output <- girafe_options(x = output, selection_type = "single", opts_toolbar(saveaspng = FALSE, hidden = c("lasso_select", "lasso_deselect")))
 
     return(output)
   })
@@ -620,6 +619,9 @@ shinyServer(function(input, output, session) {
     } else if(input$plot_type=="hsdc") {
       print("HSDC")
       code <- hsdc_plot()
+    } else if(input$plot_type=="hpg") {
+      print("HPG")
+      code <- hpg_plot()
     } else if(input$plot_type=="radar") {
       print("Radar")
       code <- radar_plot()
@@ -639,24 +641,26 @@ shinyServer(function(input, output, session) {
     
     if(nrow(data) > 0) {
       ave.meth <- get_average_method()
+      plot_data <- sym(input$plot_data)
       
       if(input$group=="None" || !input$raw) {
-        p <- ggplot(data, aes_string(x=input$plot_data)) + 
+        p <- ggplot(data, aes(x=!!plot_data)) + 
              geom_density(color="darkblue", fill="lightblue", alpha=0.4)
   
         if(input$average) {
-          p <- p + geom_vline_interactive(aes_string(xintercept=ave.meth(data[[input$plot_data]])),
+          p <- p + geom_vline_interactive(aes(xintercept=!!ave.meth(data[[input$plot_data]])),
               color="darkblue", linetype="dashed", tooltip = paste0(input$average_method, ": ", get_average_value()), data_id = "density_mean")
         }
              
       } else {
+        group <- sym(input$group)
         colours <- getGroupColours()
         mu <- get_average_value()
-        p <- ggplot(data, aes_string(x=input$plot_data, fill=input$group)) + 
+        p <- ggplot(data, aes(x=!!plot_data, fill=!!group)) + 
              geom_density(alpha=0.4) + scale_fill_manual(values=colours) + scale_color_manual(values=colours)  
   
         if(input$average) {
-          p <- p + geom_vline_interactive(data=mu, aes_string(xintercept="x", color="group"),
+          p <- p + geom_vline_interactive(data=mu, aes(xintercept=x, color=group),
                linetype="dashed", show.legend=FALSE, tooltip = paste0(input$average_method, ": ", mu$x), data_id = paste0("density_", input$average_method, "_", mu$group))
         }   
       }
@@ -680,24 +684,26 @@ shinyServer(function(input, output, session) {
     data <- getTableDataByGroup()
     
     ave.meth <- get_average_method()
+    plot_data <- sym(input$plot_data)
 
     if(input$group=="None" || !input$raw) {
 
-      p <- ggplot(data, aes_string(input$plot_data)) + stat_ecdf(geom = "step", colour="darkblue")
+      p <- ggplot(data, aes(!!plot_data)) + stat_ecdf(geom = "step", colour="darkblue")
 
       if(input$average) {
-        p <- p + geom_vline_interactive(aes_string(xintercept=ave.meth(data[[input$plot_data]])),
+        p <- p + geom_vline_interactive(aes(xintercept=!!ave.meth(data[[input$plot_data]])),
             color="darkblue", linetype="dashed", tooltip = paste0(input$average_method, ": ", get_average_value()), data_id = "ecdf_mean")
       }
            
     } else {
+      group <- sym(input$group)
       colours <- getGroupColours()
-      p <- ggplot(data, aes_string(input$plot_data, colour = input$group)) + 
+      p <- ggplot(data, aes(!!plot_data, colour = !!group)) + 
         stat_ecdf(geom = "step") + scale_color_manual(values=colours)
       mu <- get_average_value()        
 
       if(input$average) {
-        p <- p + geom_vline_interactive(data=mu, aes_string(xintercept="x", color="group"),
+        p <- p + geom_vline_interactive(data=mu, aes(xintercept=x, color=group),
              linetype="dashed", show.legend=FALSE, tooltip = paste0(input$average_method, ": ", mu$x), data_id = paste0("ecdf_", input$average_method, "_", mu$group))
       }   
     }
@@ -732,10 +738,11 @@ shinyServer(function(input, output, session) {
       
     } else {
       colours <- getGroupColours()
-      
-      hsdi <- sapply(unique(data[[input$group]]), function(x){
+      group <- sym(input$group)
+      hsdi <- sapply(input$group_member, function(x){
         hsdi(data[data[[input$group]]==x,], version=input$version)
       })
+      names(hsdi) <- input$group_member
       label <- paste("HSDI:", paste(names(hsdi), hsdi, sep="=", collapse = ", "))
 
       res <- lapply(unique(data[[input$group]]), function(x){
@@ -747,10 +754,10 @@ shinyServer(function(input, output, session) {
       
       res <- do.call(rbind, res)
       
-      p <- ggplot(res, aes_string("CumulativeProp", "CumulativeState", colour=input$group, group=input$group)) + 
+      p <- ggplot(res, aes(CumulativeProp, CumulativeState, colour=!!group, group=!!group)) + 
         geom_line() + 
         annotate("segment", x=0, y=0, xend=1,yend=1, colour="black") +  
-        annotate("text", x=0.5, y=0.9, label=label) +
+        annotate("text", x=0.5, y=0.9, label=label, size=3) +
         theme(panel.border = element_blank(), panel.grid.minor = element_blank()) +
         coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
         scale_fill_manual(values=colours) + 
@@ -761,6 +768,53 @@ shinyServer(function(input, output, session) {
 
     return(p)
 
+  })
+  
+  hpg_plot <- reactive({
+    if(is.null(input$data) || is.null(input$plot_type) || is.null(input$group))
+      return()
+    
+    if(is.null(getPaired))
+      stop("Paired data required for HPG plot.")
+    
+    if(input$group=="None")
+      stop("Group required for HPG plot.")
+    
+    if(length(input$group_member)!=2)
+      stop("Two levels required for HPG plot")
+    
+    
+    if(!is.null(input$paired) && !input$paired)
+      stop("Data are paired checkbox must be selected")
+    
+    data <- getTableDataByGroup()
+    
+    #order by paired column
+    data <- data[order(data[[getPaired()]], data[[input$group]]),]
+    
+    #use first 50 entries of each group as pre/post
+    pre <- data[data[[input$group]]==input$group_member[1],]
+    post <- data[data[[input$group]]==input$group_member[2],]
+    
+    if(!all.equal(pre[[getPaired()]], post[[getPaired()]]))
+      stop("Unable to match subjects")
+
+    #run hpg function on data.frames
+    res <- hpg(pre, post, country=input$country, version=input$version, type=input$type)
+    
+    ts <- length(getHealthStates(input$version))
+    
+    p <- ggplot(res, aes(Post, Pre, color=PCHC)) +
+      geom_point(aes(shape=PCHC)) +
+      coord_cartesian(xlim=c(1,ts), ylim=c(1,ts)) +
+      scale_x_continuous(breaks=c(1,ts)) +
+      scale_y_continuous(breaks=c(1,ts)) +
+      annotate("segment", x=1, y=1, xend=ts, yend=ts, colour="black") +
+      theme(panel.border=element_blank(), panel.grid.minor=element_blank()) +
+      xlab(input$group_member[2]) +
+      ylab(input$group_member[1])
+    
+    return(p)
   })
   
   radar_plot <- reactive({
@@ -777,9 +831,10 @@ shinyServer(function(input, output, session) {
       data <- data[,names(data) %in% getDimensionNames()]
       p <- ggRadar(data=data, rescale=FALSE, colour = "#F8766D", alpha = 0.4)
     } else {
+      group <- sym(input$group)
       colours <- getGroupColours()
       data <- data[,names(data) %in% c("MO", "SC", "UA", "PD", "AD", input$group)]
-      p <- ggRadar(data=data,aes_string(color=input$group), rescale=FALSE) + 
+      p <- ggRadar(data=data,aes(color=!!group), rescale=FALSE) + 
         scale_fill_manual(values=colours) + scale_color_manual(values=colours) +
         theme(legend.position="right")
     }
@@ -796,8 +851,8 @@ shinyServer(function(input, output, session) {
     data <- getTableDataByGroup()
     
     counts <- ifelse(input$summary_type == "counts", TRUE, FALSE)
-    summary_type <- toTitleCase(input$summary_type)
-  
+    summary_type <- sym(toTitleCase(input$summary_type))
+
     if(input$group=="None" || !input$raw) {
       data <- eq5dds(data, version=input$version, counts=counts, dimensions=getDimensionNames())
       
@@ -810,14 +865,15 @@ shinyServer(function(input, output, session) {
       colnames(data) <- c("Score", "Dimension", summary_type)
       data$Score <- as.factor(data$Score)
       
-      p <- ggplot(data, aes_string(fill="Score", y=summary_type, x="Dimension", tooltip=summary_type)) + 
+      p <- ggplot(data, aes(fill=Score, y=!!summary_type, x=Dimension, tooltip=!!summary_type)) + 
         geom_bar_interactive(position="dodge", stat="identity")
     } else {
       data <- lapply(data, function(x){melt(as.matrix(x))})
       data <- do.call(rbind, unname(Map(cbind, Group = names(data), data)))
       colnames(data) <- c(input$group, "Score", "Dimension", summary_type)
       data$Score <- as.factor(data$Score)
-      p <- ggplot(data, aes_string(fill="Score", y=summary_type, x="Dimension", tooltip=summary_type)) + 
+      data[[input$group]] <- factor(data[[input$group]], levels=unique(data[[input$group]]))
+      p <- ggplot(data, aes(fill=Score, y=!!summary_type, x=Dimension, tooltip=!!summary_type)) + 
         geom_bar_interactive(position="dodge", stat="identity") + facet_wrap(as.formula(paste("~", input$group)))
     }
     
@@ -842,7 +898,7 @@ shinyServer(function(input, output, session) {
 
   output$choose_plot_type <- renderUI({
     selectInput("plot_type", "Plot type:",
-        c("Summary"="summary", "Density"="density", "ECDF"="ecdf", "HSDC"="hsdc", "Radar"="radar")
+        c("Summary"="summary", "Density"="density", "ECDF"="ecdf", "Health State Density Curve"="hsdc", "Health Profile Grid"="hpg", "Radar"="radar")
     )
   })
 
@@ -975,6 +1031,28 @@ shinyServer(function(input, output, session) {
           renderDT(summ[[input$eq5dds]],options = list(searching = FALSE, paging = FALSE, info = FALSE))
         )
       }
+    } else if(input$plot_type =="hpg") {
+      data <- getTableDataByGroup()
+      
+      if(length(input$group_member)!=2)
+        stop("Two levels required for HPG plot")
+      
+      pre <- data[data[[input$group]]==input$group_member[1],]
+      post <- data[data[[input$group]]==input$group_member[2],]
+      
+      if(!all.equal(pre[[input$id]], post[[input$id]])) {
+        stop(paste("Paired IDs do not match"))
+      }
+      
+      if(!input$paired)
+        stop("Data are paired checkbox must be selected")
+      
+      pchc <- pchc(pre, post, version=input$version, no.problems=TRUE, totals=TRUE, summary=TRUE)
+
+      taglist <- tagList(
+        h5("PCHC"),
+        renderDT(pchc,options = list(searching = FALSE, paging = FALSE, info = FALSE))
+      )
     } else {
       stats <- getStatistics()
       if(is.null(stats))
@@ -1017,7 +1095,7 @@ shinyServer(function(input, output, session) {
     data <- getTableDataByGroup()
     paired <- FALSE
     if(!is.null(getPaired()) & length(getPaired()) > 0 & !is.null(input$paired) && input$paired) {
-      data <- data[order(data[input$id], data[input$group]),]
+      data <- data[order(data[[input$id]], data[[input$group]]),]
       paired <- TRUE
     }
     res <- wilcox.test(as.formula(paste(input$plot_data," ~ ", input$group)), data, paired=paired)
