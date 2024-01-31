@@ -20,10 +20,11 @@ components: health state description and evaluation.
 For the description component a subject self-rates their health in terms
 of five dimensions; mobility, self-care, usual activities,
 pain/discomfort, and anxiety/depression using either a three-level
-([EQ-5D-3L](https://euroqol.org/eq-5d-instruments/eq-5d-3l-about/) and
-[EQ-5D-Y](https://euroqol.org/eq-5d-instruments/eq-5d-y-about/)) or a
-five-level
-([EQ-5D-5L](https://euroqol.org/eq-5d-instruments/eq-5d-5l-about/))
+([EQ-5D-3L](https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-3l/)
+and
+[EQ-5D-Y](https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-y-3l/))
+or a five-level
+([EQ-5D-5L](https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-5l/))
 scale.
 
 The evaluation component requires a patient to record their overall
@@ -50,8 +51,9 @@ produced using the time trade-off (TTO) valuation technique or the
 visual analogue scale (VAS) valuation technique. Some countries have TTO
 and VAS value sets for EQ-5D-3L. Additionally, EQ-5D-3L “reverse
 crosswalk” value sets published on the
-[EuroQol](https://euroqol.org/support/analysis-tools/) website that
-enable EQ-5D-3L data to be mapped to EQ-5D-5L value sets are included.
+[EuroQol](https://euroqol.org/information-and-support/resources/value-sets/)
+website that enable EQ-5D-3L data to be mapped to EQ-5D-5L value sets
+are included.
 
 For EQ-5D-5L, a standardised valuation study protocol (EQ-VT) was
 developed by the EuroQol group based on the composite time trade-off
@@ -77,7 +79,7 @@ Additional information on EQ-5D can be found on the
 (2007)](https://doi.org/10.1007/1-4020-5511-0) and [Szende *et al*
 (2014)](https://doi.org/10.1007/978-94-007-7596-1). Advice on [choosing
 a value
-set](https://euroqol.org/eq-5d-instruments/eq-5d-3l-about/valuation/choosing-a-value-set/)
+set](https://euroqol.org/information-and-support/resources/value-sets/)
 can also be found on the EuroQol website.
 
 ## Installation
@@ -521,10 +523,10 @@ shannon(data, version="3L", by.dimension=FALSE)
 #> [1] 4.17
 #> 
 #> $H.max
-#> [1] 6.97
+#> [1] 7.92
 #> 
 #> $J
-#> [1] 0.6
+#> [1] 0.53
 
 #Shannon's H', H' max and J' for each dimension
 res <- shannon(data, version="3L", by.dimension=TRUE)
@@ -627,21 +629,21 @@ eq5dds(dat, version="3L", by="Sex")
 ## Helper functions
 
 Helper functions are included, which may be useful in the processing of
-EQ-5D data. ***getHealthStates*** returns a vector of all possible five
-digit health states for a specified EQ-5D version.
-***getDimensionsFromHealthStates*** splits a vector of five digit health
-states into a data.frame of their individual components and
-***getHealthStatesFromDimensions*** combines indiviual dimensions in a
-data.frame into five digit health states.
+EQ-5D data. ***get_all_health_states*** returns a vector of all possible
+five digit health states for a specified EQ-5D version.
+***get_dimensions_from_health_states*** splits a vector of five digit
+health states into a data.frame of their individual components and
+***get_health_states_from_dimensions*** combines indiviual dimensions in
+a data.frame into five digit health states.
 
 ``` r
 
 # Get all EQ-5D-3L five digit health states (top 6 returned for brevity).
-head(getHealthStates("3L"))
+head(get_all_health_states("3L"))
 #> [1] "11111" "11112" "11113" "11121" "11122" "11123"
 
 # Split five digit health states into their individual components.
-getDimensionsFromHealthStates(c("12345", "54321"), version="5L")
+get_dimensions_from_health_states(c("12345", "54321"), version="5L")
 #>   MO SC UA PD AD
 #> 1  1  2  3  4  5
 #> 2  5  4  3  2  1

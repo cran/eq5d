@@ -1,6 +1,18 @@
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
+# eq5d 0.15.2 (2024-01-31)
+
+- Japan EQ-5D-5L hybrid DCE value set added in addition to TTO.
+
+- Bug calculating Shannon H.max for 3L profiles when permutations = TRUE
+  fixed.
+
+- Helper functions now use camel case instead of snake case.
+  getHealthStates renamed to get_all_health_states.
+
+- URLs updated for new EuroQol website.
+
 # eq5d 0.15.1 (2023-11-18)
 
 - Pakistan EQ-5D-3L value set added.

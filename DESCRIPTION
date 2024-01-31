@@ -2,7 +2,7 @@ Package: eq5d
 Type: Package
 Title: Methods for Analysing 'EQ-5D' Data and Calculating 'EQ-5D' Index
         Scores
-Version: 0.15.1
+Version: 0.15.2
 Authors@R: c(
     person("Fraser", "Morton", email = "fraser.morton@glasgow.ac.uk", role = c("aut", "cre")),
     person(c("Jagtar", "Singh"), "Nijjar", role = "aut"))
@@ -13,8 +13,8 @@ Description: EQ-5D is a popular health related quality of life instrument used
     component a subject self-rates their health in terms of five dimensions; 
     mobility, self-care, usual activities, pain/discomfort, and 
     anxiety/depression using either a three-level (EQ-5D-3L,
-    <https://euroqol.org/eq-5d-instruments/eq-5d-3l-about/>) or a five-level
-    (EQ-5D-5L, <https://euroqol.org/eq-5d-instruments/eq-5d-5l-about/>) 
+    <https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-3l/>) or a five-level
+    (EQ-5D-5L, <https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-5l/>) 
     scale. Frequently the scores on these five dimensions are converted to a 
     single utility index using country specific value sets, which can be used
     in the clinical and economic evaluation of health care as well as in 
@@ -43,9 +43,9 @@ RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Language: en-GB
 NeedsCompilation: no
-Packaged: 2023-11-20 17:50:50 UTC; fm78w
+Packaged: 2024-01-31 16:56:51 UTC; fm78w
 Author: Fraser Morton [aut, cre],
   Jagtar Singh Nijjar [aut]
 Maintainer: Fraser Morton <fraser.morton@glasgow.ac.uk>
 Repository: CRAN
-Date/Publication: 2023-11-20 18:10:02 UTC
+Date/Publication: 2024-01-31 17:10:02 UTC

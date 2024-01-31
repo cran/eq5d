@@ -236,10 +236,10 @@ eq5dds(dat, version="3L", by="Sex")
 ## ----helper-------------------------------------------------------------------
 
 # Get all EQ-5D-3L five digit health states (top 6 returned for brevity).
-head(getHealthStates("3L"))
+head(get_all_health_states("3L"))
 
 # Split five digit health states into their individual components.
-getDimensionsFromHealthStates(c("12345", "54321"), version="5L")
+get_dimensions_from_health_states(c("12345", "54321"), version="5L")
 
 
 ## ----example data-------------------------------------------------------------

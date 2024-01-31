@@ -430,7 +430,7 @@ eq5d(12345, type = &quot;DSU&quot;, country = &quot;UK&quot;, age = 2, version =
 <h5>Mapping multiple states</h5>
 <pre class="r"><code># get states and create data.frame
 set.seed(12345)
-dat1 &lt;- data.frame(State = sample(getHealthStates(&quot;5L&quot;), 10), 
+dat1 &lt;- data.frame(State = sample(get_all_health_states(&quot;5L&quot;), 10), 
                    Age = sample(18:100, 10), 
                    Sex = sample(c(&quot;M&quot;,&quot;F&quot;), replace = TRUE, 10))
 

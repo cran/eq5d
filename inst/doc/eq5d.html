@@ -12,7 +12,7 @@
 
 <meta name="author" content="Fraser Morton and Jagtar Singh Nijjar" />
 
-<meta name="date" content="2023-11-20" />
+<meta name="date" content="2024-01-31" />
 
 <title>Calculating EQ-5D indices and summarising profiles with eq5d</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Calculating EQ-5D indices and summarising
 profiles with eq5d</h1>
 <h4 class="author">Fraser Morton and Jagtar Singh Nijjar</h4>
-<h4 class="date">20 November 2023</h4>
+<h4 class="date">31 January 2024</h4>
 
 
 
@@ -352,9 +352,9 @@ the clinical and economic evaluation of health care. Developed by the <a href="h
 of two components: health state description and evaluation.</p>
 <p>For the description component a subject self-rates their health in
 terms of five dimensions; mobility, self-care, usual activities,
-pain/discomfort, and anxiety/depression using either a three-level (<a href="https://euroqol.org/eq-5d-instruments/eq-5d-3l-about/">EQ-5D-3L</a>
-and <a href="https://euroqol.org/eq-5d-instruments/eq-5d-y-about/">EQ-5D-Y</a>)
-or a five-level (<a href="https://euroqol.org/eq-5d-instruments/eq-5d-5l-about/">EQ-5D-5L</a>)
+pain/discomfort, and anxiety/depression using either a three-level (<a href="https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-3l/">EQ-5D-3L</a>
+and <a href="https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-y-3l/">EQ-5D-Y</a>)
+or a five-level (<a href="https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-5l/">EQ-5D-5L</a>)
 scale.</p>
 <p>The evaluation component requires a patient to record their overall
 health status using a visual analogue scale (EQ-VAS).</p>
@@ -376,9 +376,9 @@ scores stored in CSV or Excel files.</p>
 been produced using the time trade-off (TTO) valuation technique or the
 visual analogue scale (VAS) valuation technique. Some countries have TTO
 and VAS value sets for EQ-5D-3L. Additionally, EQ-5D-3L “reverse
-crosswalk” value sets published on the <a href="https://euroqol.org/support/analysis-tools/">EuroQol</a> website
-that enable EQ-5D-3L data to be mapped to EQ-5D-5L value sets are
-included.</p>
+crosswalk” value sets published on the <a href="https://euroqol.org/information-and-support/resources/value-sets/">EuroQol</a>
+website that enable EQ-5D-3L data to be mapped to EQ-5D-5L value sets
+are included.</p>
 <p>For EQ-5D-5L, a standardised valuation study protocol (EQ-VT) was
 developed by the EuroQol group based on the composite time trade-off
 (cTTO) valuation technique supplemented by a discrete choice experiment
@@ -396,7 +396,7 @@ age-sex based EQ-5D-3L to EQ-5D-5L and EQ-5D-5L to EQ-5D-3L mappings
 from dimensions and exact or approximate utility index scores.</p>
 <p>Additional information on EQ-5D can be found on the <a href="https://euroqol.org/">EuroQol</a> website as well as in <a href="https://doi.org/10.1007/1-4020-5511-0">Szende <em>et al</em>
 (2007)</a> and <a href="https://doi.org/10.1007/978-94-007-7596-1">Szende <em>et al</em>
-(2014)</a>. Advice on <a href="https://euroqol.org/eq-5d-instruments/eq-5d-3l-about/valuation/choosing-a-value-set/">choosing
+(2014)</a>. Advice on <a href="https://euroqol.org/information-and-support/resources/value-sets/">choosing
 a value set</a> can also be found on the EuroQol website.</p>
 <div id="installation" class="section level2">
 <h2>Installation</h2>
@@ -802,10 +802,10 @@ indicate more diversity and higher values indicate less.</p>
 <span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; [1] 4.17</span></span>
 <span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; $H.max</span></span>
-<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt; [1] 6.97</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt; [1] 7.92</span></span>
 <span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt; $J</span></span>
-<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; [1] 0.6</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; [1] 0.53</span></span>
 <span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a></span>
 <span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#Shannon&#39;s H&#39;, H&#39; max and J&#39; for each dimension</span></span>
 <span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">shannon</span>(data, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">by.dimension=</span><span class="cn">TRUE</span>)</span>
@@ -899,20 +899,20 @@ grouping variable to be specified when analysing the data subgroup.</p>
 <div id="helper-functions" class="section level2">
 <h2>Helper functions</h2>
 <p>Helper functions are included, which may be useful in the processing
-of EQ-5D data. <strong><em>getHealthStates</em></strong> returns a
+of EQ-5D data. <strong><em>get_health_states</em></strong> returns a
 vector of all possible five digit health states for a specified EQ-5D
-version. <strong><em>getDimensionsFromHealthStates</em></strong> splits
-a vector of five digit health states into a data.frame of their
+version. <strong><em>get_dimensions_from_health_states</em></strong>
+splits a vector of five digit health states into a data.frame of their
 individual components and
-<strong><em>getHealthStatesFromDimensions</em></strong> combines
+<strong><em>get_health_states_from_dimensions</em></strong> combines
 indiviual dimensions in a data.frame into five digit health states.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a></span>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co"># Get all EQ-5D-3L five digit health states (top 6 returned for brevity).</span></span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">getHealthStates</span>(<span class="st">&quot;3L&quot;</span>))</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">get_all_health_states</span>(<span class="st">&quot;3L&quot;</span>))</span>
 <span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;11111&quot; &quot;11112&quot; &quot;11113&quot; &quot;11121&quot; &quot;11122&quot; &quot;11123&quot;</span></span>
 <span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a></span>
 <span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co"># Split five digit health states into their individual components.</span></span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="fu">getDimensionsFromHealthStates</span>(<span class="fu">c</span>(<span class="st">&quot;12345&quot;</span>, <span class="st">&quot;54321&quot;</span>), <span class="at">version=</span><span class="st">&quot;5L&quot;</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="fu">get_dimensions_from_health_states</span>(<span class="fu">c</span>(<span class="st">&quot;12345&quot;</span>, <span class="st">&quot;54321&quot;</span>), <span class="at">version=</span><span class="st">&quot;5L&quot;</span>)</span>
 <span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt;   MO SC UA PD AD</span></span>
 <span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt; 1  1  2  3  4  5</span></span>
 <span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#&gt; 2  5  4  3  2  1</span></span></code></pre></div>
