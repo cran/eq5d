@@ -93,7 +93,7 @@
 #' \item{\strong{Chile}: Zarate V, Kind P, Valenzuela P, Vignau A, Olivares-Tirado P, Munoz A. Social valuation of EQ-5D health states: the Chilean case. Value in Health. 2011 Dec;14(8):1135-41. \href{https://pubmed.ncbi.nlm.nih.gov/22152184/}{PubMed}}
 #' \item{\strong{China}: Liu GG, Wu H, Li M, Gao C, Luo N. Chinese time trade-off values for EQ-5D health states. Value Health. 2014 Jul;17(5):597-604. doi: 10.1016/j.jval.2014.05.007. Epub 2014 Jul 23. \href{https://pubmed.ncbi.nlm.nih.gov/25128053/}{PubMed}}
 #' \item{\strong{Denmark}: Wittrup-Jensen KU, Lauridsen J, Gudex C, Pedersen KM. Generation of a Danish TTO value set for EQ-5D health states. Scandinavian Journal of Public Health. 2009;37(5):459-466. \href{https://pubmed.ncbi.nlm.nih.gov/19411320/}{PubMed}}
-#' \item{\strong{Ecuador}: Lucio R, Flores V,  Granja M, Mata G. Resultados de la encuesta de valoración social de los estados de salud de lAños de vida ajustados por calidad (QALY'S). 2019. \href{https://www.salud.gob.ec/wp-content/uploads/2019/08/resultados_encuesta_valoracion_estados_salud.pdf}{Link}}
+#' \item{\strong{Ecuador}: Lucio R, Flores V,  Granja M, Mata G. Resultados de la encuesta de valoración social de los estados de salud de lAños de vida ajustados por calidad (QALY'S). 2019. \href{https://www.researchgate.net/publication/335840590_QALYs_FINAL_Ecuadordig}{Link}}
 #' \item{\strong{France}: Chevalier J, de Pouvourville G. Valuing EQ-5D using time trade-off in France. Eur J Health Econ. 2013 Feb;14(1):57-66. doi: 10.1007/s10198-011-0351-x. Epub 2011 Sep 21. \href{https://pubmed.ncbi.nlm.nih.gov/21935715/}{PubMed}}
 #' \item{\strong{Germany}: Greiner W, Claes C, Busschbach JJ, von der Schulenburg JM. Validating the EQ-5D with time trade off for the German population. Eur J Health Econ. 2005 Jun;6(2):124-30. doi: 10.1007/s10198-004-0264-z. \href{https://pubmed.ncbi.nlm.nih.gov/19787848/}{PubMed}}
 #' \item{\strong{Hungary}: Rencz F, Brodszky V, Gulácsi L, Golicki D, Ruzsa G, Pickard AS, Law EH, Péntek M. Parallel Valuation of the EQ-5D-3L and EQ-5D-5L by Time Trade-Off in Hungary. Value Health. 2020 Sep;23(9):1235-1245. doi: 10.1016/j.jval.2020.03.019. Epub 2020 Aug 12. \href{https://pubmed.ncbi.nlm.nih.gov/32940242/}{PubMed}}
@@ -156,7 +156,7 @@
 #' EQ-5D-5L VT value set calculation data for Australia, Belgium, Canada, China, 
 #' Denmark, Egypt, England, Ethiopia, France, Germany, HongKong, Hungary, India, 
 #' Indonesia, Iran, Ireland, Italy, Japan, Malaysia, Mexico, Netherlands, 
-#' NewZealand, Peru, Philippines, Poland, Portugal, Romania, 
+#' NewZealand, Peru, Philippines, Poland, Portugal, Romania, SaudiArabia, 
 #' Slovenia, SouthKorea, Spain, Sweden, Taiwan, Thailand, 
 #' Uganda, Uruguay, USA, Vietnam and Western Preference Pattern (WePP).
 #'
@@ -189,6 +189,7 @@
 #' \item{\strong{Poland} Golicki D, Jakubczyk M, Niewada M, Wrona W, Busschbach JJ. Valuation of EQ-5D health states in Poland: first TTO-based social value set in Central and Eastern Europe. Value Health. 2010 Mar-Apr;13(2):289-97. doi: 10.1111/j.1524-4733.2009.00596.x. \href{https://pubmed.ncbi.nlm.nih.gov/19744296/}{PubMed}}
 #' \item{\strong{Portugal} Ferreira PL, Antunes P, Ferreira LN, Pereira LN, Ramos-Goñi JM. A hybrid modelling approach for eliciting health state preferences: the Portuguese EQ-5D-5L value set. Qual Life Res. 2019 Jun 14. doi: 10.1007/s11136-019-02226-5. \href{https://pubmed.ncbi.nlm.nih.gov/31201730/}{PubMed}}
 #' \item{\strong{Romania} Olariu E, Mohammed W, Oluboyede Y, Caplescu R, Niculescu-Aron IG, Paveliu MS, Vale L. EQ-5D-5L: a value set for Romania. Eur J Health Econ. 2022 Jun 10. doi: 10.1007/s10198-022-01481-7. Epub ahead of print. \href{https://pubmed.ncbi.nlm.nih.gov/35688994/}{PubMed}}
+#' \item{\strong{Saudi Arabia} Al-Jedai A, Almudaiheem H, Al-Salamah T, Aldosari M, Almutairi AR, Almogbel Y, AlRuthia Y, Althemery AU, Alluhidan M, Roudijk B, Purba FD, Awad N, O'jeil R. Valuation of EQ-5D-5L in the Kingdom of Saudi Arabia: A national representative study. Value Health. 2024 Feb 9:S1098-3015(24)00047-0. doi: 10.1016/j.jval.2024.01.017. \href{https://pubmed.ncbi.nlm.nih.gov/38342365/}{PubMed}}
 #' \item{\strong{Slovenia} Prevolnik Rupel V, Ogorevc M. EQ-5D-5L Value Set for Slovenia. Pharmacoeconomics. 2023 Jun 21. doi: 10.1007/s40273-023-01280-9. Epub ahead of print. \href{https://pubmed.ncbi.nlm.nih.gov/37341959/}{PubMed}}
 #' \item{\strong{South Korea} Kim SH, Ahn J, Ock M, Shin S, Park J, Luo N, Jo MW. The EQ-5D-5L valuation study in Korea. Qual Life Res. 2016 Jul;25(7):1845-52. doi: 10.1007/s11136-015-1205-2. \href{https://pubmed.ncbi.nlm.nih.gov/26961008/}{PubMed}}
 #' \item{\strong{Spain}: Ramos-Goñi JM, Craig B, Oppe M, Ramallo-Fariña Y, Pinto-Prades JL, Luo N, Rivero-Arias O. Handling data quality issues to estimate the Spanish EQ-5D-5L Value Set using a hybrid interval regression approach.  Value in Health 2018 May;21(5):596-604. doi: 10.1016/j.jval.2017.10.023. \href{https://pubmed.ncbi.nlm.nih.gov/29753358/}{PubMed}}
