@@ -1,6 +1,20 @@
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
+# eq5d 0.15.4 (2024-09-04)
+
+- Trinidad and Tobago EQ-5D-5L value set added.
+
+- Bermuda EQ-5D-3L and EQ-5D-5L to EQ-5D-3L crosswalk value sets added.
+
+- Brazilian EQ-5D-Y value set added.
+
+- EQ-5D-Y changed to EQ-5D-Y-3L. “Y” value for version parameter is now
+  deprecated. “Y3L” should be used instead.
+
+- “digits” argument added to eq5d and eq5dmap functions to enable NICE
+  DSU mapping scores to be returned with more precision.
+
 # eq5d 0.15.3 (2024-04-29)
 
 - Saudi Arabia EQ-5D-5L value set added.
