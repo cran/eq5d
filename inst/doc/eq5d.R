@@ -258,5 +258,5 @@ head(scores)
 
 
 ## ----shiny, echo=TRUE, eval=FALSE---------------------------------------------
-#  shiny_eq5d()
+# shiny_eq5d()
 
