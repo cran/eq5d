@@ -2,7 +2,7 @@ Package: eq5d
 Type: Package
 Title: Methods for Analysing 'EQ-5D' Data and Calculating 'EQ-5D' Index
         Scores
-Version: 0.15.6
+Version: 0.15.7
 Authors@R: c(
     person("Fraser", "Morton", email = "fraser.morton@glasgow.ac.uk", role = c("aut", "cre")),
     person(c("Jagtar", "Singh"), "Nijjar", role = "aut"))
@@ -22,7 +22,7 @@ Description: EQ-5D is a popular health related quality of life instrument used
     index scores from a subject's dimension scores. 32 TTO and 11 VAS EQ-5D-3L
     value sets including those for countries in Szende et al (2007) 
     <doi:10.1007/1-4020-5511-0> and Szende et al (2014) 
-    <doi:10.1007/978-94-007-7596-1>, 45 EQ-5D-5L EQ-VT value sets, the 
+    <doi:10.1007/978-94-007-7596-1>, 46 EQ-5D-5L EQ-VT value sets, the 
     EQ-5D-5L crosswalk value sets developed by van Hout et al. (2012) 
     <doi:10.1016/j.jval.2012.02.008>, the crosswalk value sets for Bermuda, Jordan and 
     Russia and the reverse crosswalk value sets. 10 EQ-5D-Y value sets are also 
@@ -36,19 +36,19 @@ Description: EQ-5D is a popular health related quality of life instrument used
     or Excel files. 
 License: MIT + file LICENSE
 Encoding: UTF-8
-Depends: R (>= 3.5.0)
+Depends: R (>= 3.5.0), lifecycle, rlang
 Suggests: testthat, shiny, DT, mime, readxl, ggplot2, ggiraph,
         ggiraphExtra, shinycssloaders, shinyWidgets, FSA, PMCMRplus,
-        knitr, rmarkdown, covr, lifecycle
+        knitr, rmarkdown, covr
 URL: https://github.com/fragla/eq5d
 BugReports: https://github.com/fragla/eq5d/issues
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 Language: en-GB
 NeedsCompilation: no
-Packaged: 2025-01-16 21:18:49 UTC; fm78w
+Packaged: 2025-02-28 09:47:55 UTC; fm78w
 Author: Fraser Morton [aut, cre],
   Jagtar Singh Nijjar [aut]
 Maintainer: Fraser Morton <fraser.morton@glasgow.ac.uk>
 Repository: CRAN
-Date/Publication: 2025-01-16 21:30:02 UTC
+Date/Publication: 2025-02-28 10:00:01 UTC

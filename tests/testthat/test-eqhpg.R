@@ -23,3 +23,13 @@ test_that("eqhpg data.frame throws error", {
   expect_error(hpg(pre.df[-1,], post.df, country = "UK", version="3L", type="TTO", ignore.invalid=TRUE))
   expect_error(hpg(pre, post, country = "UK", type="TTO", no.problems = F))
 })
+
+test_that("eq5dhpg using version='Y' is deprecated", {
+  rlang::local_options(lifecycle_verbosity = "error")
+  expect_error(hpg(pre, post, country = "Brazil", version="Y", type="CW", no.problems = F))
+})
+
+test_that("eq5d using version='Y' still works", {
+  rlang::local_options(lifecycle_verbosity = "quiet")
+  expect_equal(as.character(hpg(pre, post, country = "Brazil", version="Y", type="CW", no.problems = F)[2,]), c(158, 60, "Improve"))
+})

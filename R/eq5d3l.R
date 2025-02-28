@@ -208,14 +208,12 @@ eq5d3l <- function(scores, type="TTO", country="UK") {
   interactions <- INTERACTIONS[which(!is.na(survey[INTERACTIONS]))]
 
   if(length(interactions) > 0) {
-    interaction.pairs <- sapply(interactions, function(x) {
-      pairs <- strsplit(gsub("([[:digit:]])([[:upper:]])", "\\1 \\2", x, " ")," ")
-      lapply(pairs, function(y){
-        all(y %in% score.dimensions)
-      })
-    })
-    interaction.pairs <- unlist(interaction.pairs)
-    interaction.present <- which(interaction.pairs)
+
+    pairs <- sub("([[:digit:]])([[:upper:]])", "\\1 \\2", interactions)
+    split.pairs <- strsplit(pairs, " ")
+    names(split.pairs) <- interactions
+    
+    interaction.present <- which(unlist(lapply(split.pairs, function(y){ all(y %in% score.dimensions)})))
 
     if(length(interaction.present) > 0) {
       return(survey[names(interaction.present)])

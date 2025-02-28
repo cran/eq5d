@@ -12,7 +12,7 @@
 
 <meta name="author" content="Fraser Morton and Jagtar Singh Nijjar" />
 
-<meta name="date" content="2025-01-16" />
+<meta name="date" content="2025-02-28" />
 
 <title>Calculating EQ-5D indices and summarising profiles with eq5d</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Calculating EQ-5D indices and summarising
 profiles with eq5d</h1>
 <h4 class="author">Fraser Morton and Jagtar Singh Nijjar</h4>
-<h4 class="date">16 January 2025</h4>
+<h4 class="date">28 February 2025</h4>
 
 
 
@@ -409,66 +409,68 @@ a value set</a> can also be found on the EuroQol website.</p>
 <div id="quick-start" class="section level2">
 <h2>Quick Start</h2>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(eq5d)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#single calculation</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; Loading required package: lifecycle</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; Loading required package: rlang</span></span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#named vector MO, SC, UA, PD and AD represent mobility, self-care, usual activites, pain/discomfort and anxiety/depression, respectfully.</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>scores <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">MO=</span><span class="dv">1</span>,<span class="at">SC=</span><span class="dv">2</span>,<span class="at">UA=</span><span class="dv">3</span>,<span class="at">PD=</span><span class="dv">2</span>,<span class="at">AD=</span><span class="dv">1</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#EQ-5D-3L using the UK TTO value set</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span>scores, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;TTO&quot;</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; [1] 0.329</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#Using five digit format</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">12321</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;TTO&quot;</span>)</span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; [1] 0.329</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#EQ-5D-Y using the Slovenian cTTO value set</span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">13321</span>, <span class="at">country=</span><span class="st">&quot;Slovenia&quot;</span>, <span class="at">version=</span><span class="st">&quot;Y3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;cTTO&quot;</span>)</span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; [1] 0.295</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#EQ-5D-5L crosswalk</span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">55555</span>, <span class="at">country=</span><span class="st">&quot;Spain&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;CW&quot;</span>)</span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; [1] -0.654</span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#EQ-5D-3L reverse crosswalk</span></span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">33333</span>, <span class="at">country=</span><span class="st">&quot;Germany&quot;</span>, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;RCW&quot;</span>)</span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; [1] -0.329</span></span>
-<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a></span>
-<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#EQ-5D-5L to EQ-5D-3L NICE DSU mapping</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#single calculation</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#named vector MO, SC, UA, PD and AD represent mobility, self-care, usual activites, pain/discomfort and anxiety/depression, respectfully.</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>scores <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">MO=</span><span class="dv">1</span>,<span class="at">SC=</span><span class="dv">2</span>,<span class="at">UA=</span><span class="dv">3</span>,<span class="at">PD=</span><span class="dv">2</span>,<span class="at">AD=</span><span class="dv">1</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#EQ-5D-3L using the UK TTO value set</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span>scores, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;TTO&quot;</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; [1] 0.329</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#Using five digit format</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">12321</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;TTO&quot;</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; [1] 0.329</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#EQ-5D-Y using the Slovenian cTTO value set</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">13321</span>, <span class="at">country=</span><span class="st">&quot;Slovenia&quot;</span>, <span class="at">version=</span><span class="st">&quot;Y3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;cTTO&quot;</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; [1] 0.295</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#EQ-5D-5L crosswalk</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">55555</span>, <span class="at">country=</span><span class="st">&quot;Spain&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;CW&quot;</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; [1] -0.654</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#EQ-5D-3L reverse crosswalk</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">33333</span>, <span class="at">country=</span><span class="st">&quot;Germany&quot;</span>, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;RCW&quot;</span>)</span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; [1] -0.329</span></span>
 <span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a></span>
-<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#Using dimensions</span></span>
-<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="fu">c</span>(<span class="at">MO=</span><span class="dv">1</span>,<span class="at">SC=</span><span class="dv">2</span>,<span class="at">UA=</span><span class="dv">3</span>,<span class="at">PD=</span><span class="dv">4</span>,<span class="at">AD=</span><span class="dv">5</span>), <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">age=</span><span class="dv">23</span>, <span class="at">sex=</span><span class="st">&quot;male&quot;</span>)</span>
-<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="co">#&gt; [1] 0.083</span></span>
-<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a></span>
-<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#Using exact utility score</span></span>
-<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="fl">0.922</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="at">age=</span><span class="dv">18</span>, <span class="at">sex=</span><span class="st">&quot;male&quot;</span>)</span>
-<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="co">#&gt; [1] 0.893</span></span>
-<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a></span>
-<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a><span class="co">#Using approximate utility score</span></span>
-<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="fl">0.435</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="at">age=</span><span class="dv">30</span>, <span class="at">sex=</span><span class="st">&quot;female&quot;</span>, <span class="at">bwidth=</span><span class="fl">0.0001</span>)</span>
-<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a><span class="co">#&gt; [1] 0.302</span></span>
-<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a></span>
-<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a><span class="co">#multiple calculations using the Canadian VT value set</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#EQ-5D-5L to EQ-5D-3L NICE DSU mapping</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="co">#Using dimensions</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="fu">c</span>(<span class="at">MO=</span><span class="dv">1</span>,<span class="at">SC=</span><span class="dv">2</span>,<span class="at">UA=</span><span class="dv">3</span>,<span class="at">PD=</span><span class="dv">4</span>,<span class="at">AD=</span><span class="dv">5</span>), <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">age=</span><span class="dv">23</span>, <span class="at">sex=</span><span class="st">&quot;male&quot;</span>)</span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#&gt; [1] 0.083</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="co">#Using exact utility score</span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="fl">0.922</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="at">age=</span><span class="dv">18</span>, <span class="at">sex=</span><span class="st">&quot;male&quot;</span>)</span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a><span class="co">#&gt; [1] 0.893</span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a><span class="co">#Using approximate utility score</span></span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="fl">0.435</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="at">age=</span><span class="dv">30</span>, <span class="at">sex=</span><span class="st">&quot;female&quot;</span>, <span class="at">bwidth=</span><span class="fl">0.0001</span>)</span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a><span class="co">#&gt; [1] 0.302</span></span>
 <span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a></span>
-<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="co">#data.frame with individual dimensions</span></span>
-<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a>scores.df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a>  <span class="at">MO=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>), <span class="at">SC=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>), <span class="at">UA=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>), <span class="at">PD=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">4</span>), <span class="at">AD=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>)</span>
-<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a>)</span>
-<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a></span>
-<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a><span class="fu">eq5d</span>(scores.df, <span class="at">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;VT&quot;</span>)</span>
-<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></span>
-<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a></span>
-<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a><span class="co">#data.frame using five digit format</span></span>
-<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a>scores.df2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">state=</span><span class="fu">c</span>(<span class="dv">11111</span>, <span class="dv">25532</span>, <span class="dv">34241</span>, <span class="dv">43332</span>, <span class="dv">52141</span>))</span>
-<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a></span>
-<span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a><span class="fu">eq5d</span>(scores.df2, <span class="at">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;VT&quot;</span>, <span class="at">five.digit=</span><span class="st">&quot;state&quot;</span>)</span>
-<span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></span>
-<span id="cb3-57"><a href="#cb3-57" tabindex="-1"></a></span>
-<span id="cb3-58"><a href="#cb3-58" tabindex="-1"></a><span class="co">#or using a vector</span></span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="co">#multiple calculations using the Canadian VT value set</span></span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a></span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a><span class="co">#data.frame with individual dimensions</span></span>
+<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a>scores.df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a>  <span class="at">MO=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>), <span class="at">SC=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>), <span class="at">UA=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>), <span class="at">PD=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">4</span>), <span class="at">AD=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>)</span>
+<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a>)</span>
+<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a></span>
+<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a><span class="fu">eq5d</span>(scores.df, <span class="at">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;VT&quot;</span>)</span>
+<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></span>
+<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a></span>
+<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a><span class="co">#data.frame using five digit format</span></span>
+<span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a>scores.df2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">state=</span><span class="fu">c</span>(<span class="dv">11111</span>, <span class="dv">25532</span>, <span class="dv">34241</span>, <span class="dv">43332</span>, <span class="dv">52141</span>))</span>
+<span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a></span>
+<span id="cb3-57"><a href="#cb3-57" tabindex="-1"></a><span class="fu">eq5d</span>(scores.df2, <span class="at">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;VT&quot;</span>, <span class="at">five.digit=</span><span class="st">&quot;state&quot;</span>)</span>
+<span id="cb3-58"><a href="#cb3-58" tabindex="-1"></a><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></span>
 <span id="cb3-59"><a href="#cb3-59" tabindex="-1"></a></span>
-<span id="cb3-60"><a href="#cb3-60" tabindex="-1"></a><span class="fu">eq5d</span>(scores.df2<span class="sc">$</span>state, <span class="at">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;VT&quot;</span>)</span>
-<span id="cb3-61"><a href="#cb3-61" tabindex="-1"></a><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></span></code></pre></div>
+<span id="cb3-60"><a href="#cb3-60" tabindex="-1"></a><span class="co">#or using a vector</span></span>
+<span id="cb3-61"><a href="#cb3-61" tabindex="-1"></a></span>
+<span id="cb3-62"><a href="#cb3-62" tabindex="-1"></a><span class="fu">eq5d</span>(scores.df2<span class="sc">$</span>state, <span class="at">country=</span><span class="st">&quot;Canada&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">type=</span><span class="st">&quot;VT&quot;</span>)</span>
+<span id="cb3-63"><a href="#cb3-63" tabindex="-1"></a><span class="co">#&gt; [1] 0.949 0.362 0.390 0.524 0.431</span></span></code></pre></div>
 </div>
 <div id="value-sets" class="section level2">
 <h2>Value sets</h2>
