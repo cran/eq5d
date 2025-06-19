@@ -18,7 +18,7 @@ eq5d(scores=scores, country="UK", version="3L", type="TTO")
 #Using five digit format
 eq5d(scores=12321, country="UK", version="3L", type="TTO")
 
-#EQ-5D-Y using the Slovenian cTTO value set
+#EQ-5D-Y-3L using the Slovenian cTTO value set
 eq5d(scores=13321, country="Slovenia", version="Y3L", type="cTTO")
 
 #EQ-5D-5L crosswalk

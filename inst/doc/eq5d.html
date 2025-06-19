@@ -12,7 +12,7 @@
 
 <meta name="author" content="Fraser Morton and Jagtar Singh Nijjar" />
 
-<meta name="date" content="2025-02-28" />
+<meta name="date" content="2025-06-19" />
 
 <title>Calculating EQ-5D indices and summarising profiles with eq5d</title>
 
@@ -50,8 +50,9 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -62,7 +63,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -341,7 +342,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Calculating EQ-5D indices and summarising
 profiles with eq5d</h1>
 <h4 class="author">Fraser Morton and Jagtar Singh Nijjar</h4>
-<h4 class="date">28 February 2025</h4>
+<h4 class="date">19 June 2025</h4>
 
 
 
@@ -353,7 +354,7 @@ of two components: health state description and evaluation.</p>
 <p>For the description component a subject self-rates their health in
 terms of five dimensions; mobility, self-care, usual activities,
 pain/discomfort, and anxiety/depression using either a three-level (<a href="https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-3l/">EQ-5D-3L</a>
-and <a href="https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-y-3l/">EQ-5D-Y</a>)
+and <a href="https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-y-3l/">EQ-5D-Y-3L</a>)
 or a five-level (<a href="https://euroqol.org/information-and-support/euroqol-instruments/eq-5d-5l/">EQ-5D-5L</a>)
 scale.</p>
 <p>The evaluation component requires a patient to record their overall
@@ -376,7 +377,8 @@ scores stored in CSV or Excel files.</p>
 been produced using the time trade-off (TTO) valuation technique or the
 visual analogue scale (VAS) valuation technique. Some countries have TTO
 and VAS value sets for EQ-5D-3L. Additionally, EQ-5D-3L “reverse
-crosswalk” value sets published on the <a href="https://euroqol.org/information-and-support/resources/value-sets/">EuroQol</a>
+crosswalk” value sets based on the <a href="https://pubmed.ncbi.nlm.nih.gov/34452708/">van Hout <em>et al</em>
+(2021)</a> models as well as those published on the <a href="https://euroqol.org/information-and-support/resources/value-sets/">EuroQol</a>
 website that enable EQ-5D-3L data to be mapped to EQ-5D-5L value sets
 are included.</p>
 <p>For EQ-5D-5L, a standardised valuation study protocol (EQ-VT) was
@@ -384,8 +386,8 @@ developed by the EuroQol group based on the composite time trade-off
 (cTTO) valuation technique supplemented by a discrete choice experiment
 (DCE). The EuroQol group recommends users to use a standard value set
 where available.</p>
-<p>The EQ-5D-5L “crosswalk” value sets published by <a href="https://pubmed.ncbi.nlm.nih.gov/22867780/">van Hout <em>et
-al</em></a> as well as that for Russia are also included. The crosswalk
+<p>The EQ-5D-5L “crosswalk” value sets published by <a href="https://pubmed.ncbi.nlm.nih.gov/22867780/">van Hout <em>et al</em>
+(2012)</a> as well as that for Russia are also included. The crosswalk
 value sets enable index values to be calculated for EQ-5D-5L data where
 no value set is available by mapping between the EQ-5D-5L and EQ-5D-3L
 descriptive systems.</p>
@@ -425,7 +427,7 @@ a value set</a> can also be found on the EuroQol website.</p>
 <span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">12321</span>, <span class="at">country=</span><span class="st">&quot;UK&quot;</span>, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;TTO&quot;</span>)</span>
 <span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; [1] 0.329</span></span>
 <span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#EQ-5D-Y using the Slovenian cTTO value set</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#EQ-5D-Y-3L using the Slovenian cTTO value set</span></span>
 <span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">13321</span>, <span class="at">country=</span><span class="st">&quot;Slovenia&quot;</span>, <span class="at">version=</span><span class="st">&quot;Y3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;cTTO&quot;</span>)</span>
 <span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; [1] 0.295</span></span>
 <span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a></span>
@@ -435,7 +437,7 @@ a value set</a> can also be found on the EuroQol website.</p>
 <span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a></span>
 <span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#EQ-5D-3L reverse crosswalk</span></span>
 <span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="fu">eq5d</span>(<span class="at">scores=</span><span class="dv">33333</span>, <span class="at">country=</span><span class="st">&quot;Germany&quot;</span>, <span class="at">version=</span><span class="st">&quot;3L&quot;</span>, <span class="at">type=</span><span class="st">&quot;RCW&quot;</span>)</span>
-<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; [1] -0.329</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; [1] -0.495</span></span>
 <span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a></span>
 <span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#EQ-5D-5L to EQ-5D-3L NICE DSU mapping</span></span>
 <span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a></span>
@@ -520,17 +522,23 @@ filtered by EQ-5D version, value set type or by country.</p>
 <span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a><span class="co">#&gt; 1 EQ-5D-3L  TTO  France 21935715  10.1007/s10198-011-0351-x &lt;NA&gt;        &lt;NA&gt;</span></span>
 <span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a><span class="co">#&gt; 2 EQ-5D-5L   CW  France 22867780 10.1016/j.jval.2012.02.008 &lt;NA&gt;        &lt;NA&gt;</span></span>
 <span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a><span class="co">#&gt; 3 EQ-5D-5L   VT  France 31912325 10.1007/s40273-019-00876-4 &lt;NA&gt;        &lt;NA&gt;</span></span>
-<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a></span>
-<span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a><span class="co"># Return all EQ-5D-5L to EQ-5D-3L DSU value sets without references.</span></span>
-<span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a><span class="fu">valuesets</span>(<span class="at">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">references=</span><span class="cn">NULL</span>)</span>
-<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a><span class="co">#&gt;    Version Type     Country</span></span>
-<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a><span class="co">#&gt; 1 EQ-5D-5L  DSU       China</span></span>
-<span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a><span class="co">#&gt; 2 EQ-5D-5L  DSU     Germany</span></span>
-<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a><span class="co">#&gt; 3 EQ-5D-5L  DSU       Japan</span></span>
-<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a><span class="co">#&gt; 4 EQ-5D-5L  DSU Netherlands</span></span>
-<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a><span class="co">#&gt; 5 EQ-5D-5L  DSU  SouthKorea</span></span>
-<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a><span class="co">#&gt; 6 EQ-5D-5L  DSU       Spain</span></span>
-<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a><span class="co">#&gt; 7 EQ-5D-5L  DSU          UK</span></span></code></pre></div>
+<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a><span class="co">#&gt; 4 EQ-5D-3L  RCW  France 34452708 10.1016/j.jval.2021.03.009 &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a><span class="co">#&gt;             Notes</span></span>
+<span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a><span class="co">#&gt; 1            &lt;NA&gt;</span></span>
+<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a><span class="co">#&gt; 2            &lt;NA&gt;</span></span>
+<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a><span class="co">#&gt; 3            &lt;NA&gt;</span></span>
+<span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a><span class="co">#&gt; 4 van Hout (2021)</span></span>
+<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a></span>
+<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a><span class="co"># Return all EQ-5D-5L to EQ-5D-3L DSU value sets without references.</span></span>
+<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a><span class="fu">valuesets</span>(<span class="at">type=</span><span class="st">&quot;DSU&quot;</span>, <span class="at">version=</span><span class="st">&quot;5L&quot;</span>, <span class="at">references=</span><span class="cn">NULL</span>)</span>
+<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a><span class="co">#&gt;    Version Type     Country</span></span>
+<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a><span class="co">#&gt; 1 EQ-5D-5L  DSU       China</span></span>
+<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a><span class="co">#&gt; 2 EQ-5D-5L  DSU     Germany</span></span>
+<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a><span class="co">#&gt; 3 EQ-5D-5L  DSU       Japan</span></span>
+<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a><span class="co">#&gt; 4 EQ-5D-5L  DSU Netherlands</span></span>
+<span id="cb4-58"><a href="#cb4-58" tabindex="-1"></a><span class="co">#&gt; 5 EQ-5D-5L  DSU  SouthKorea</span></span>
+<span id="cb4-59"><a href="#cb4-59" tabindex="-1"></a><span class="co">#&gt; 6 EQ-5D-5L  DSU       Spain</span></span>
+<span id="cb4-60"><a href="#cb4-60" tabindex="-1"></a><span class="co">#&gt; 7 EQ-5D-5L  DSU          UK</span></span></code></pre></div>
 </div>
 <div id="analysis-of-eq-5d-profiles" class="section level2">
 <h2>Analysis of EQ-5D Profiles</h2>
@@ -894,7 +902,7 @@ grouping variable to be specified when analysing the data subgroup.</p>
 <div id="helper-functions" class="section level2">
 <h2>Helper functions</h2>
 <p>Helper functions are included, which may be useful in the processing
-of EQ-5D data. <strong><em>get_health_states</em></strong> returns a
+of EQ-5D data. <strong><em>get_all_health_states</em></strong> returns a
 vector of all possible five digit health states for a specified EQ-5D
 version. <strong><em>get_dimensions_from_health_states</em></strong>
 splits a vector of five digit health states into a data.frame of their

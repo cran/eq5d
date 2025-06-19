@@ -26,7 +26,7 @@
 #'   be a number which is applied to the whole dataset. When a single
 #'   NICE DSU score is being calculated "age", "sex" and "bwidth" are also
 #'   used. See \code{\link{eq5dmap}} for valid options. "digits" can also be 
-#'   used to return NICE DSU mapping scores with more precision.
+#'   used to return scores with more precision.
 #' @return a numeric vector of utility index scores.
 #' @examples
 #' 
@@ -255,20 +255,25 @@ eq5d.default <- function(scores, version=NULL, type=NULL, country=NULL, ignore.i
 
   if(version=="3L") {
     if(!is.null(type) && type %in% c("TTO", "VAS")) {
-      eq5d3l(scores, type=type, country=country)
+      eq5d3l(scores, type=type, country=country, digits = digits)
     } else if(!is.null(type) && type=="RCW") {
-      eq5drcw(scores, country=country)
+      if(is.null(args$method)) {
+        method <- "VH"
+      } else {
+        method <- args$method
+      }
+      eq5drcw(scores, country=country, method=method, digits = digits)
     } else if(!is.null(type) && type=="DSU") {
       eq5dmap(scores, country, version, args$age, args$sex, bwidth, digits)
     } else {
       stop("EQ-5D-3L valueset type not recognised. Must be one of 'TTO', 'VAS', 'RCW' or 'DSU'.")
     }
   } else if (version=="Y3L") {
-    eq5dy3l(scores, country=country)
+    eq5dy3l(scores, country=country, digits = digits)
   }
   else {
     if(!is.null(type) && type=="VT") {
-      eq5d5l(scores, country=country)
+      eq5d5l(scores, country=country, digits = digits)
     } else if(!is.null(type) && type=="CW") {
       eq5dcw(scores, country=country)
     } else if(!is.null(type) && type=="DSU") {
@@ -313,29 +318,37 @@ valuesets <- function(type=NULL, version=NULL, country=NULL, references=c("PubMe
   if(!is.null(version) && version == "Y3L") version <- "Y-3L"
   if(!is.null(version)) version <- paste0("EQ-5D-", version)
 
-  tto <- data.frame(Version="EQ-5D-3L", Type="TTO", Country=colnames(TTO))
-  vas <- data.frame(Version="EQ-5D-3L", Type="VAS", Country=colnames(VAS))
-  rcw <- data.frame(Version="EQ-5D-3L", Type="RCW", Country=colnames(RCW))
-  vt <- data.frame(Version="EQ-5D-5L", Type="VT", Country=colnames(VT))
-  cw <- data.frame(Version="EQ-5D-5L", Type="CW", Country=colnames(CW))
-  y <- data.frame(Version="EQ-5D-Y-3L", Type="cTTO", Country=colnames(Y3L))
-  dsu3l <- data.frame(Version="EQ-5D-3L", Type="DSU", Country=sub("Copula", "", grep("Copula", sort(colnames(DSU3L)), value=TRUE)))
-  dsu5l <- data.frame(Version="EQ-5D-5L", Type="DSU", Country=sub("Copula", "", grep("Copula", sort(colnames(DSU5L)), value=TRUE)))
-  vs <- rbind(tto, vas, rcw, vt, cw, y, dsu3l, dsu5l)
+  tto <- data.frame(Version="EQ-5D-3L", Type="TTO", Country=colnames(TTO), Notes=NA)
+  vas <- data.frame(Version="EQ-5D-3L", Type="VAS", Country=colnames(VAS), Notes=NA)
+  rcw <- data.frame(Version="EQ-5D-3L", Type="RCW", Country=colnames(RCW), Notes="EuroQol (2019)")
+  rcwvh <- data.frame(Version="EQ-5D-3L", Type="RCW", Country=colnames(RCWVH), Notes="van Hout (2021)")
+  vt <- data.frame(Version="EQ-5D-5L", Type="VT", Country=colnames(VT), Notes=NA)
+  cw <- data.frame(Version="EQ-5D-5L", Type="CW", Country=colnames(CW), Notes=NA)
+  y <- data.frame(Version="EQ-5D-Y-3L", Type="cTTO", Country=colnames(Y3L), Notes=NA)
+  dsu3l <- data.frame(Version="EQ-5D-3L", Type="DSU", Country=sub("Copula", "", grep("Copula", sort(colnames(DSU3L)), value=TRUE)), Notes=NA)
+  dsu5l <- data.frame(Version="EQ-5D-5L", Type="DSU", Country=sub("Copula", "", grep("Copula", sort(colnames(DSU5L)), value=TRUE)), Notes=NA)
 
+  vs1 <- rbind(tto, vas, rcw, vt, cw, y, dsu3l, dsu5l)
+  vs1 <- merge(vs1, REFERENCES, by = c("Version", "Type", "Country"))
+  
+  vs2 <- cbind(rcwvh, REFERENCES[REFERENCES$Type=="RCW" & is.na(REFERENCES$Country),!names(REFERENCES) %in% c("Country", "Version", "Type")], row.names = NULL)
+  vs <- rbind(vs1, vs2)
+  
   if(!is.null(type)) vs <- vs[vs$Type==type,]
   if(!is.null(version)) vs <- vs[vs$Version==version,]
   if(!is.null(country)) vs <- vs[grep(paste0("^",country), vs$Country),]
   rownames(vs) <- NULL
   
-  vs <- merge(vs, REFERENCES, by = c("Version", "Type", "Country"))
-  
   if(is.null(references)) {
-    vs <- vs[,c("Version", "Type", "Country")]
-  } else if (all(references %in% c("PubMed", "DOI", "ISBN", "ExternalURL"))) {
-    vs <- vs[,c("Version", "Type", "Country", references)]
+    vs <- vs[,c("Version", "Type", "Country", "Notes")]
+  } else if (all(references %in% c("PubMed", "DOI", "ISBN", "ExternalURL", "Notes"))) {
+    vs <- vs[,c("Version", "Type", "Country", references, "Notes")]
   } else {
     stop("One or more reference columns not found. Valid options are one or more of PubMed, DOI, ISBN and ExternalURL.")
+  }
+  
+  if(all(is.na(vs$Notes))) {
+    vs <- vs[,!(names(vs) %in% "Notes")]
   }
   
   vs

@@ -63,11 +63,12 @@
 #' @export
 "DSU5L"
 
-#' EQ-5D-3L Reverse Crosswalk data
+#' EQ-5D-3L Reverse Crosswalk data (deprecated)
 #'
 #' Reverse Crosswalk index value table to calculate EQ-5D-5L indices from EQ-5D-3L data
-#'   for England, Germany, Netherlands and USA. Table uses the values of van Hout et al
-#'   from the EuroQol analysis tools webpage.
+#'   for England, Germany, Netherlands and USA. Table uses the values published 
+#'   on the EuroQol analysis tools webpage based on reverse engineering of
+#'   van Hout et al (2012)
 #'
 #' @source
 #' \href{https://euroqol.org/information-and-support/resources/value-sets/}{Reverse crosswalk datasets}
@@ -75,6 +76,18 @@
 #' @name RCW
 #' @export
 "RCW"
+
+#' EQ-5D-3L Reverse Crosswalk data
+#'
+#' Reverse Crosswalk index value table to calculate EQ-5D-5L indices from EQ-5D-3L data
+#'   using the van Hout et al (2021) method.
+#'
+#' @source
+#' \doi{10.1016/j.jval.2021.03.009}
+#'
+#' @name RCWVH
+#' @export
+"RCWVH"
 
 #' EQ-5D-3L TTO value set data
 #'
@@ -164,10 +177,10 @@
 #'
 #' EQ-5D-5L VT value set calculation data for Australia, Belgium, Canada, China, 
 #' Denmark, Egypt, England, Ethiopia, France, Germany, Ghana, HongKong, Hungary,
-#' India, Indonesia, Iran, Ireland, Italy, Japan, Malaysia, Mexico, Netherlands, 
-#' NewZealand, Norway, Peru, Philippines, Poland, Portugal, Romania, SaudiArabia, 
-#' Slovenia, SouthKorea, Spain, Sweden, Taiwan, Thailand, Uganda, UAE, Uruguay, 
-#' USA, Vietnam and Western Preference Pattern (WePP).
+#' India, Indonesia, Iran, Ireland, Italy, Japan, Malaysia, Mexico, Morocco, 
+#' Netherlands, NewZealand, Norway, Peru, Philippines, Poland, Portugal, 
+#' Romania, SaudiArabia, Slovenia, SouthKorea, Spain, Sweden, Taiwan, Thailand, 
+#' Uganda, UAE, Uruguay, USA, Vietnam and Western Preference Pattern (WePP).
 #'
 #' @source
 #' \itemize{
@@ -192,6 +205,7 @@
 #' \item{\strong{Japan}: Shiroiwa T, Ikeda S, Noto S, Igarashi A, Fukuda T, Saito S, Shimozuma K. Comparison of Value Set Based on DCE and/or TTO Data: Scoring for EQ-5D-5L Health States in Japan. Value Health. 2016 Jul-Aug;19(5):648-54. \doi{10.1016/j.jval.2016.03.1834}. Epub 2016 Apr 26. PMID: 27565282.}
 #' \item{\strong{Malaysia}: Shafie AA; Vasan Thakumar A; Lim CJ;Luo N; Rand-Hendriksen K; Yusof FA. EQ-5D-5L Valuation for the Malaysian Population. PharmacoEconomics. 2019 May;37(5):715-725. \doi{10.1007/s40273-018-0758-7}. PMID: 30535779.}
 #' \item{\strong{Mexico}: Gutierrez-Delgado C, Galindo-Suárez RM, Cruz-Santiago C, Shah K, Papadimitropoulos M, Feng Y, Zamora B, Devlin N. EQ-5D-5L Health-State Values for the Mexican Population. Appl Health Econ Health Policy. 2021 Nov;19(6):905-914. \doi{10.1007/s40258-021-00658-0}. Epub 2021 Jun 26. PMID: 34173957.}
+#' \item{\strong{Morocco}: Azizi A, Boutib A, Achak D, Purba FD, Rencz F, Saad E, Hilali A, Ahid S, Nejjari C, Stolk EA, Roudijk B, Youlyouz-Marfak I, Marfak A.Valuing health-related quality of life: an EQ-5D-5L value set for Morocco. Qual Life Res. 2025 Feb 28. \doi{10.1007/s11136-025-03930-1}. Online ahead of print. PMID: 40019677.}
 #' \item{\strong{Netherlands}: Versteegh MM, Vermeulen KM, Evers SM, de Wit GA, Prenger R, Stolk EA. Dutch Tariff for the Five-Level Version of EQ-5D. Value in Health. 2016 Jun;19(4):343-52.  \doi{10.1016/j.jval.2016.01.003}. PMID: 27325326.}
 #' \item{\strong{New Zealand}: Sullivan T, Hansen P, Ombler F, Derrett S, Devlin N. A new tool for creating personal and social EQ-5D-5L value sets, including valuing 'dead'. Soc Sci Med. 2020 Feb;246:112707. \doi{10.1016/j.socscimed.2019.112707}. Epub 2019 Nov 30. PMID: 31945596.}
 #' \item{\strong{Norway}: Garratt AM, Stavem K, Shaw JW, Rand K. EQ-5D-5L value set for Norway: a hybrid model using cTTO and DCE data. Qual Life Res. 2024 Nov 20. \doi{10.1007/s11136-024-03837-3}. Epub ahead of print. PMID: 39565555.}
